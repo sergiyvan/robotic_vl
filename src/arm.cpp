@@ -17,7 +17,6 @@
 
 // representations
 #include "representations/motion/motorPositionRequest.h"
-#include "representations/motion/kinematicTree.h"
 #include "representations/hardware/motorAngles.h"
 
 #include "platform/hardware/robot/robotModel.h"
