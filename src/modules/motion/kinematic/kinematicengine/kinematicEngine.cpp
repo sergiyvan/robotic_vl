@@ -23,7 +23,7 @@ namespace {
 static std::string activeTasksName = "motion.kinematicengine.activeTasks";
 REGISTER_DEBUG(activeTasksName, TABLE, BASIC);
 
-REGISTER_MODULE(Motion, KinematicEngine, true, "Kinematic engine for multiple movement tasks and cool stuff. Can save the world")
+REGISTER_MODULE(Motion, KinematicEngine, false, "Kinematic engine for multiple movement tasks and cool stuff. Can save the world")
 
 KinematicEngine::KinematicEngine()
 	: m_inverseKinematic()
