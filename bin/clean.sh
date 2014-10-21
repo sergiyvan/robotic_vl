@@ -25,7 +25,6 @@ rm -vf BerlinUnited.make
 rm -vf Cognition.make
 rm -vf Motion.make
 
-make -C src/platform/hardware/robot/staticMotions2013 clean
 
 #rm -vrf doc/xabsl
 #rm -vrf doc/doxygen
