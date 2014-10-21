@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<robotdescription>
+	<effector id="0" name="root" type="rotation" position="50 0 0" rpy="0 0 0" defaultMinMaxAngle="0 -360 360" maxForce="0.25" maxSpeed="80">
+		<body mass="1000" name="rootMass" position="0 0 0"/>
+		
+		<effector id="1" name="motor1" type="rotation" position="0 0 500" rpy="0 -90 0" defaultMinMaxAngle="0 -360 360" maxForce="1.0" maxSpeed="80">
+			<body mass="10" name="motor1Mass" position="0 0 0"/>
+
+			<effector id="2" name="motor2" type="rotation" position="200 0 0" rpy="0 0 0" defaultMinMaxAngle="0 -360 360" maxForce="0.25" maxSpeed="80">
+				<body mass="10" name="motor2Mass" position="0 0 0"/>
+
+					<effector name="hand" type="dummy" position="250 0 0" rpy="0 0 0">
+							<body mass="100" name="handMass" position="0 0 0"/>
+					</effector>
+			</effector>
+		</effector>
+	</effector>
+</robotdescription>
+
