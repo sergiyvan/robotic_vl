@@ -1,0 +1,7 @@
+README
+======
+
+ALL executable helper scripts belong into this folder.
+
+Each script should have an explanation (and --help) of its purpose and how
+to use it at the beginning of the file.

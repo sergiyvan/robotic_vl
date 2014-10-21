@@ -1,0 +1,37 @@
+package de.fumanoids.message;
+
+import "msg_message.proto";
+
+message MotorStatus {
+	enum StatusType {
+		MOTOR_POSITION    = 0;
+		MOTOR_LOAD        = 1;
+		MOTOR_TEMPERATURE = 2;
+		MOTOR_VOLTAGE     = 3;
+		MOTOR_ENABLED     = 4;
+	}
+
+	required StatusType type         = 1;
+	repeated Entry      motorMap     = 2;
+	optional bool       isRequest    = 3 [default = false];
+	optional int32      id           = 4;
+	//ID of a status message request
+	optional int32      responseTo   = 5;
+}
+
+message Entry {
+	required int32 motorID = 1;
+	optional float value   = 4;
+	optional int32 error   = 3;
+
+//	optional int32 oldValue = 2; // [ deprecated = true ]
+}
+
+/*
+** Extend Message to contain motor status
+*/
+
+extend Message {
+	optional MotorStatus motorStatus = 16;
+}
+	

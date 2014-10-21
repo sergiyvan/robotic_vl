@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# Here you can add custom commands that get executed before the build.
+# 
+# Rename the file to custom_prebuild_commands.sh to activate it.
+
+espeak 'Starting compiling' 2> /dev/null &

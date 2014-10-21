@@ -1,0 +1,12 @@
+How to add a new motion
+
+
+1) Record the motion in a motion2 file.
+2) Place the motion2 file in the correct folder,
+   where a cmotion file will be created at compilation time.
+3) Extend MotionType for the new motion.
+4) Register the motion in the corresponding robot model (e.g.
+   in src/platform/hardware/robot/robotModel201?.cpp)
+5) Extend XABSL:
+   a) in MotionControl
+   b) in MotionSymbols

@@ -1,0 +1,156 @@
+from threading import Thread
+from protobuf import msg_fumanoid_pb2
+from protobuf import msg_remotecontrol_pb2
+import time
+import struct
+
+try:
+    import pygame
+    from pygame.locals import *
+except:
+    import gtk
+    msg = gtk.MessageDialog(None, gtk.DIALOG_MODAL, gtk.MESSAGE_ERROR,
+            gtk.BUTTONS_OK, "Please install PyGame. On Debian/Ubuntu, \
+            try 'apt-get install python-pygame'")
+    msg.run()
+    msg.destroy()
+
+
+class Gamepad(Thread):
+    """Gamepad class for remote controlling the robot"""
+
+    def __init__(self, messageSender, robotIP, wTree):
+        Thread.__init__(self)
+
+        self.messageSender = messageSender
+        self.robotIP = robotIP
+        self.j = None
+        self.isRunning = False
+        self.forward = 0
+        self.sideward = 0
+        self.rotation = 0
+
+        # labels of current speed
+        self.lblForward = wTree.get_widget("lblForward")
+        self.lblRotation = wTree.get_widget("lblRotation")
+        self.lblSideward = wTree.get_widget("lblSideward")
+        self.lblWalkingMode = wTree.get_widget("lblWalkingMode")
+
+        # Speed limits for walker
+        self.WALKER_MAX_FORWARD = 45
+        self.WALKER_MAX_BACKWARD = 30
+        self.WALKER_MAX_ROTATION = 90
+        self.WALKER_MAX_SIDEWARD = 25
+        self.WALKER_DEFAULT_SPEED = (45, 30, 90, 25)
+
+        # init gampad
+        pygame.init()
+        # main joystick device system
+        pygame.joystick.init()
+        try:
+            # create a joystick instance
+            self.j = pygame.joystick.Joystick(0)
+            # init instance
+            self.j.init()
+            print 'Enabled joystick: ' + self.j.get_name()
+            print 'Sending to: ' + self.robotIP
+        except pygame.error:
+            import gtk
+            msg = gtk.MessageDialog(None, gtk.DIALOG_MODAL,
+                    gtk.MESSAGE_ERROR, gtk.BUTTONS_OK,
+                    "No Gamepad found. Please make sure it is connected.")
+            msg.run()
+            msg.destroy()
+
+    def getFilteredAxis(self, axis):
+        """Deal with dead/noisy zone of gamepad axis."""
+        value = self.j.get_axis(axis)
+        if abs(value) < 0.05:
+            return 0
+        else:
+            return value
+
+    def run(self):
+        # do not run if we haven't any joystick object
+        if self.j == None:
+            return
+
+        self.isRunning = True
+        # poll the event queue
+        while self.isRunning == True:
+            for event in pygame.event.get():
+                if event.type == JOYAXISMOTION:
+                    self.scaleWalkerSpeed()
+                if event.type == JOYBUTTONDOWN:
+                    pass
+                    #self.messageSender.buttonPressed(event.button,
+                            #self.robotIP)
+
+            time.sleep(0.1)
+
+            # TODO: nur senden, wenn sich wirklich was veraendert hat
+            self.send()
+            self.update_info_labels()
+
+    def send(self):
+        # fumanoid msg
+        msg = msg_fumanoid_pb2.Message()
+        msg.robotID = 1
+        # get extension
+        control = msg.Extensions[msg_remotecontrol_pb2.remoteControlRequest]
+        # fill it
+        control.walkerEnabled = True
+        control.walkerSpeed.forwardSpeed = self.forward
+        control.walkerSpeed.sidewardSpeed = self.sideward
+        control.walkerSpeed.rotationSpeed = self.rotation
+        # send it
+        size = msg.ByteSize()
+        data = msg.SerializeToString()
+        data = struct.pack("!LL", 0, size) + data
+        self.messageSender.sendMessage(42, 0, self.robotIP, data)
+        print msg
+
+    def update_info_labels(self):
+        """Update the labels that indicate the input speed of the gamepad."""
+        self.lblForward.set_text(str(self.forward))
+        self.lblRotation.set_text(str(self.rotation))
+        self.lblSideward.set_text(str(self.sideward))
+
+    def scaleWalkerSpeed(self):
+        """Scale walker speed corresponding to the WALKER_MAX values"""
+        self.forward = -self.getFilteredAxis(1)
+        if self.forward > 0:
+            self.forward = int(self.WALKER_MAX_FORWARD * self.forward)
+        else:
+            self.forward = int(self.WALKER_MAX_BACKWARD * self.forward)
+        self.sideward = int(self.WALKER_MAX_SIDEWARD *
+                self.getFilteredAxis(3))
+        self.rotation = -int(self.WALKER_MAX_ROTATION *
+                self.getFilteredAxis(0))
+
+    def get_max_speed_values(self):
+        """Return the MaxSpeed of the walker"""
+        forward = self.WALKER_MAX_FORWARD
+        backward = self.WALKER_MAX_BACKWARD
+        sideward = self.WALKER_MAX_SIDEWARD
+        rotation = self.WALKER_MAX_ROTATION
+        return forward, backward, rotation, sideward
+
+    def set_max_speed_values(self, forward, backward, rotation, sideward):
+        """Sets the max speed for the walker"""
+        self.WALKER_MAX_FORWARD = int(forward)
+        self.WALKER_MAX_BACKWARD = int(backward)
+        self.WALKER_MAX_ROTATION = int(rotation)
+        self.WALKER_MAX_SIDEWARD = int(sideward)
+
+    def reset_max_speed_values(self):
+        """Reset the MaxSpeed of the walker tab"""
+        self.WALKER_MAX_FORWARD = self.WALKER_DEFAULT_SPEED[0]
+        self.WALKER_MAX_BACKWARD = self.WALKER_DEFAULT_SPEED[1]
+        self.WALKER_MAX_ROTATION = self.WALKER_DEFAULT_SPEED[2]
+        self.WALKER_MAX_SIDEWARD = self.WALKER_DEFAULT_SPEED[3]
+
+    def quit(self):
+        if (self.isRunning == True):
+            self.isRunning = False
+            self.join(1)

@@ -1,0 +1,2 @@
+Put the protobuf files here that are needed by install.py
+(do not delete this file, otherwise it is empty and git will remove it)

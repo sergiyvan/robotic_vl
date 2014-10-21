@@ -1,0 +1,117 @@
+/* Protocol Buffer definition for a drawing.
+**
+** Drawings are used to visualize information, e.g. by drawing on a camera image or on a blank canvas.
+** Due to the different possibilities to draw and the varying coordinate systems in use, a number of
+** possible canvasses is defined and must be known to make sense of the pixel coordinates as they will
+** have to be interpreted differently depending on the canvas being used.
+*/
+
+package de.fumanoids.message;
+
+import "msg_message.proto";
+
+
+/*------------------------------------------------------------------------------------------------*/
+
+/* 
+** 
+*/
+
+message Drawings {
+	repeated Drawing drawings = 1;
+}
+
+
+/*------------------------------------------------------------------------------------------------*/
+
+/* A single draw operation (only one of the optional values should be included!) with no information
+** about the canvas to be used.
+*/
+
+message Drawing {
+	/* color to be used, RGB with values in [0,255] */
+	message Color {
+		required int32 r = 1;
+		required int32 g = 2;
+		required int32 b = 3;
+	}
+
+	message Circle {
+		required sint32 x      = 1;
+		required sint32 y      = 2;
+		required int32  radius = 3;
+		optional bool   filled = 4 [ default = false ];
+		optional int32  alpha  = 5 [ default = 255 ];
+	}
+
+	message Rectangle {
+		required sint32 x      = 1;
+		required sint32 y      = 2;
+		required int32  width  = 3;
+		required int32  height = 4;
+		optional bool   filled = 5 [ default = false ];
+		optional int32  alpha  = 6 [ default = 255 ];
+	}
+
+	message Line {
+		required sint32 x1     = 1;
+		required sint32 y1     = 2;
+		required sint32 x2     = 3;
+		required sint32 y2     = 4;
+	}
+
+	message Arrow {
+		optional sint32 x         = 1;
+		optional sint32 y         = 2;
+		optional sint32 direction = 3;
+		optional int32  length    = 4;
+	}
+	
+	message Text {
+		optional sint32 x     = 1;
+		optional sint32 y     = 2;
+		optional string text  = 3;
+	}
+
+	message Tetragon {
+		optional sint32 x1     = 1;
+		optional sint32 y1     = 2;
+		optional sint32 x2     = 3;
+		optional sint32 y2     = 4;
+		optional sint32 x3     = 5;
+		optional sint32 y3     = 6;
+		optional sint32 x4     = 7;
+		optional sint32 y4     = 8;
+		optional bool   filled = 9 [ default = false ];
+	}
+
+	message Gauss2D {
+		optional float x = 1;
+		optional float y = 2;
+		optional float cov11 = 3;
+		optional float cov12 = 4;
+		optional float cov21 = 5;
+		optional float cov22 = 6;
+	}
+
+	message CircularArc {
+		required sint32 x             = 1;
+		required sint32 y             = 2;
+		required int32  radius        = 3;
+		required sint32 start_angle   = 4;
+		required sint32 central_angle = 5;
+		optional bool   filled        = 6 [ default = false ];
+	}
+
+	optional Circle      circle       = 1;
+	optional Rectangle   rectangle    = 2;
+	optional Line        line         = 3;
+	optional Arrow       arrow        = 4;
+	optional Text        text         = 5;
+	// color the given objects are painted
+	optional Color       color        = 6;
+	optional Tetragon    tetragon     = 7;
+	optional Gauss2D     gauss2d      = 8;
+	optional CircularArc circular_arc = 9;
+
+}

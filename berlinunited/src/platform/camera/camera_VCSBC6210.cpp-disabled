@@ -1,0 +1,123 @@
+#include "camera_VCSBC6210.h"
+#include "firmware_VCSBC6210.h"
+
+#include "md5.h"
+
+
+typedef enum {
+	  LOADER_BOOT             =   1
+	, LOADER_FLASH            =   7
+} LoaderCommandType;
+
+typedef struct {
+	uint32_t command;
+	uint32_t length;
+} LoaderCommand;
+
+
+/*------------------------------------------------------------------------------------------------*/
+
+/**
+ */
+
+CameraVCSBC6210::CameraVCSBC6210() {
+	//                  Settings name               Register name          Label           Default    Min       Max
+	//---------------------------------------------------------------------------------------------------------------------
+	addSupportedSetting( CAMERA_EXPOSURE,           0,                     "Exposure",        1000,     0,    10000 );
+	addSupportedSetting( CAMERA_GAIN,               0,                     "Gain",              32,     0,    10000 );
+	addSupportedSetting( CAMERA_R_GAIN,             0,                     "R Gain",          1024,     0,     8192 ); // Color_Lib.pdf, page 23
+	addSupportedSetting( CAMERA_G_GAIN,             0,                     "G Gain",          1024,     0,     8192 ); // Color_Lib.pdf, page 23
+	addSupportedSetting( CAMERA_B_GAIN,             0,                     "B Gain",          1024,     0,     8192 ); // Color_Lib.pdf, page 23
+	addSupportedSetting( CAMERA_ROTATE_IMAGE,       0,                     "Rotate 90°",         0,     0,        3 ); // Extension lib, page 5
+	addSupportedSetting( CAMERA_START_X,            0,                     "Image start (x)",   56,     0,      752 );
+	addSupportedSetting( CAMERA_START_Y,            0,                     "Image start (y)",    0,     0,      752 );
+	addSupportedSetting( CAMERA_WIDTH,              0,                     "Image width",      640,     0,      752 );
+	addSupportedSetting( CAMERA_HEIGHT,             0,                     "Image height",     480,     0,      752 );
+
+	CameraImage::autoPixelEnhanceMode = AUTO;
+}
+
+
+/*------------------------------------------------------------------------------------------------*/
+
+/**
+ */
+
+CameraVCSBC6210::~CameraVCSBC6210() {
+}
+
+
+/*------------------------------------------------------------------------------------------------*/
+
+/**
+ */
+
+bool CameraVCSBC6210::openCamera(const char* deviceName, uint16_t requestedImageWidth, uint16_t requestedImageHeight) {
+	while (true) {
+		std::string host = services.getConfig().getStrValue("camera.remote.ip", "192.168.1.100");
+		int port = services.getConfig().getIntValue("camera.remote.port", 22222);
+		Transport *transport = new TransportTCP(port, host.c_str());
+
+		// connect to camera
+		while (false == transport->open()) {
+			WARNING("Could not connect to camera on port %d at %s", port, host.c_str());
+			sleep(1);
+		}
+
+		// retrieve firmware checksum
+		MD5_CTX md5_local;
+		MD5Init(&md5_local);
+		MD5Update(&md5_local, (const unsigned char*)BINARY_VCSBC6210, BINARY_VCSBC6210_SIZE);
+		MD5Final(&md5_local);
+
+		MD5_CTX md5_remote;
+		transport->read(md5_remote.digest, 16);
+
+		bool updateFirmware = (services.getConfig().getIntValue("camera.updatefirmware", 1) != 0);
+		bool firmwaresMatch = (memcmp(md5_local.digest, md5_remote.digest, 16) == 0);
+
+		if (!updateFirmware && !firmwaresMatch) {
+			WARNING("Camera firmware does not match, but update of firmwares has been disabled. Continuing without update.");
+			firmwaresMatch = true;
+		}
+
+		if (firmwaresMatch) {
+			LoaderCommand command;
+			command.command = LOADER_BOOT;
+			command.length  = 0;
+			transport->write((uint8_t*)&command, sizeof command);
+			transport->close();
+			sleep(1);
+			break;
+		} else {
+			INFO("Camera firmwares do not match, updating ...");
+
+			LoaderCommand command;
+			command.command = LOADER_FLASH;
+			command.length  = BINARY_VCSBC6210_SIZE;
+			transport->write((uint8_t*)&command, sizeof command);
+			transport->write((uint8_t*)BINARY_VCSBC6210, BINARY_VCSBC6210_SIZE);
+			transport->close();
+			sleep(1);
+			continue;
+		}
+	}
+
+	requestedImageWidth  = 752;
+	requestedImageHeight = 640;
+	return CameraNetwork::openCamera(deviceName, requestedImageWidth, requestedImageHeight);
+}
+
+
+/*------------------------------------------------------------------------------------------------*/
+
+/**
+ */
+
+void CameraVCSBC6210::autoWhiteBalance(int16_t startX, int16_t endX, int16_t startY, int16_t endY) {
+	// send command to perform a white balance
+	device->whiteBalance(startX, startY, abs(endX - startX), abs(endY - startY));
+
+	// retrieve changed variables
+	device->refreshCameraParameters();
+}

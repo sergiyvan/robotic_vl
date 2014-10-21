@@ -1,0 +1,35 @@
+/* Protocol Buffer definition for waypoints
+**
+*/
+
+package de.fumanoids.message;
+
+import "msg_message.proto";
+import "msg_position.proto";
+
+
+/*------------------------------------------------------------------------------------------------*/
+
+/** The Map message defines the environmental map the robot interacts on.
+ ** A number of pre-defined maps exist (the images are pre-stored in FUremote),
+ ** but for custom maps the map image data can be submitted.
+ */
+
+message WayPoint {
+	required Vec3   position      = 1;
+	optional double thetaInDeg    = 2;
+	// TODO: add rotation pitch/roll
+}
+
+
+/*------------------------------------------------------------------------------------------------*/
+
+message WayPoints {
+	repeated WayPoint waypoints = 1;
+}
+
+/*------------------------------------------------------------------------------------------------*/
+
+extend Message {
+	optional WayPoints  wayPointsToSet  = 31;
+}

@@ -1,0 +1,28 @@
+package de.fumanoids.message;
+
+import "msg_position.proto";
+import "msg_message.proto";
+
+
+/**
+ * GroundTruth data provided by the simulator or some other system.
+ */
+message GroundTruth {
+	repeated GTRobotPose robotPoses = 1;
+	optional Vec2d ball = 2;
+}
+
+
+/**
+ * GTRobotPose states where the robot is on the field.
+ */
+message GTRobotPose {
+	optional uint32 robotID = 1;
+	optional Pose2D pose = 2;
+}
+
+
+// extend fumanoid message
+extend de.fumanoids.message.Message {
+	optional GroundTruth groundTruth = 6;
+}

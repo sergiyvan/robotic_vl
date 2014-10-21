@@ -1,0 +1,113 @@
+#!/bin/bash
+
+# Redirect output to stderr.
+exec 1>&2
+
+if git-rev-parse --verify HEAD 2>/dev/null >/dev/null
+then
+	against=HEAD
+else
+	# Initial commit: diff against an empty tree object
+	against=4b825dc642cb6eb9a060e54bf8d69288fbee4904
+fi
+
+# check that nobody commits into the berlinunited directory
+if [[ ! -e ".git/MERGE_MSG" ]]; then
+	for i in `git diff-index --cached --name-only $against`; do
+		if [[ $i == berlinunited/* ]]; then
+			echo "ABORTING COMMIT: File $i was modified, which belongs to your local copy of the BerlinUnited framework. In order to stay compatible with the upstream version, you must not modify your local copy of the framework. Instead, ask for upstream integration of your modification, or integrate your changes outside the framework."
+			exit 1
+		fi
+	done
+fi
+
+# check coding convention
+git-diff-index -p -M --cached $against -- | perl -e '
+	my $found_bad = 0;
+	my $filename;
+	my $reported_filename = "";
+	my $lineno;
+	sub bad_line {
+		my ($why, $line) = @_;
+		if (!$found_bad) {
+			print STDERR "*\n";
+			print STDERR "* You have some suspicious patch lines:\n";
+			print STDERR "*\n";
+			$found_bad = 1;
+		}
+		if ($reported_filename ne $filename) {
+			print STDERR "* In $filename\n";
+			$reported_filename = $filename;
+		}
+		print STDERR "* $why (line $lineno)\n";
+		print STDERR "$filename:$lineno:$line\n";
+	}
+	while (<>) {
+		if (m|^diff --git a/(.*) b/\1$|) {
+			$filename = $1;
+			next;
+		}
+		next unless ($filename =~ m/(\.cpp|\.h)$/);
+		next if ($filename =~ m/berlinunited\//);
+		if (/^@@ -\S+ \+(\d+)/) {
+			$lineno = $1 - 1;
+			next;
+		}
+		if (/^ /) {
+			$lineno++;
+			next;
+		}
+		if (s/^\+//) {
+			$lineno++;
+			chomp;
+
+			# ignore everything after a comment
+			s/\s*\/\/.*$//;           # // ...
+			s/\s*\/\*.*\*\/\s*$//; # /* ... */ end of line
+			s/\/\*.*\*\///;        # /* ... */ inline
+
+			# get rid of things in quotes to prevent misclassifications
+			s/"[^"]*"/""/g;
+
+			# Opening braces ({) need to be prefaced with a whitespace,
+			# i.e. instead of "if (true){" we want "if (true) {".
+			if (/(\)|\w)\{/) {
+				bad_line("missing space before opening brace", $_);
+			}
+
+			# After keywords (NOT function names) we want a space before the
+			# opening parentheses. I.e. instead of "if(true)" we want "if (true)"
+			if (/\W+(for\(|if\(|while\(|do\{)/) {
+				bad_line("missing space after keyword", $_);
+			}
+
+			# We want a space after a comma, i.e. instead of "min(a,b)" we want
+			# to have "min(a, b)"
+			if (/,\S/) {
+				bad_line("missing space after comma", $_);
+			}
+
+			# Comparison or logical operators should use spaces BEFORE
+			if (/\w(<=|=>|==|!=|\&\&|\|\|)/) {
+				bad_line("missing space before comparison or logical operator", $_);
+			}
+
+			# Comparison or logical operators should use spaces AFTER
+			if (/(<=|=>|==|!=|\&\&|\|\|)\w/) {
+				bad_line("missing space after comparison or logical operator", $_);
+			}
+
+			if (/\s$/) {
+				bad_line("trailing whitespace", $_);
+			}
+
+			if (/[^\t]\t/) {
+				bad_line("stray tab - did you use tabs for formatting (they are just for intendation)", $_);
+			}
+			if (/^([<>])\1{6} |^={7}$/) {
+				bad_line("unresolved merge conflict", $_);
+			}
+		}
+	}
+	exit($found_bad);
+'

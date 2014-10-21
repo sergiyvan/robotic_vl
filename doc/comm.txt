@@ -1,0 +1,100 @@
+Documentation for network communication
+=======================================
+
+Environment and Philosophy
+--------------------------
+
+In a normal RoboCup environment, multiple robots and multiple users with computers
+may try to communicate. The general communication workflow can be depicted as
+
+          +-> Robot  <---------------->  Laptop/PC
+          |     ^
+          |     |
+          +-----+
+
+I.e. robots communicate with other robots and with computers. There is no communi-
+cation between computers. 
+
+During an official game, all communication FROM computers TO robots is strictly
+forbidden except to service robots that are not currently playing. Also, all
+communication between the robots MUST be via UDP.
+
+During testing, a single computer will usually only interact with one robot directly,
+but there are also instances where multiple robots are monitored, esp. as far as
+debug output and general status information is concerned. The latter is already part
+of the general robot-to-robot UDP communication, whereas the former is something
+multiple laptops may want to see from a single robot. In fact, there is need to
+support the scenario of multiple computers interacting with a specific robot.
+
+Communication channels available are usually network-based, i.e. TCP and UDP. The
+latter is suitable for general purpose packets that should be received by many
+parties (broadcast UDP) or that can be lost or delayed.
+
+However UDP has a size limitation (<= 64kbyte). As we need to transfer larger 
+amounts of data, e.g. images or calibration files, support for TCP is also required.
+
+Defining a client-server relationship is easy with UDP as we can simply define
+the robot to be the server and the PCs the clients. This is based on the fact
+that it is (normally) the PC that requests information from the robots.
+
+The same holds true with TCP streaming. Similar to browser's receiving a stream of
+data from a webserver, PCs can receive image streams from robots. The advantage is
+also that in this case it will be the PC side that has to handle initiating the
+connections and re-establishing them, whereas the robot just needs to use them.
+
+
+Communication Protocol
+----------------------
+
+All communication is handled via the exchange of Protobuf messages. As Protobuf
+messages do not include information about the specific type of message that is
+being sent, we use a common base message that is extended with the specific sub
+messages.
+
+For messages streamed via UDP, no special wrapping outside of Protobuf is required,
+however for future compatibility we preface every packet with a small header 
+denoting the type (protobuf) as well as the size of the message. In case of TCP this
+is a necessary requirement, as Protobuf also does not include information about the
+length of a message (in fact, concatenating multiple messages is a supported feature).
+
+Each message is thus prefaced with the following data:
+
+    uint16_t  messageType (network byte order)
+    uint8_t   flags
+    uint8_t   unused
+
+The message continues for message type 1 (RoboCup Common Code) with
+    uint32_t  length (network byte order)
+
+and for message type 42 (FUmanoids 2011) with
+    uint32_t  unused (must be set to 0)
+    uint32_t  length (network byte order)
+
+Other message types are currently not supported. Flags are set to 0.
+
+
+Message flow
+------------
+
+
+
+
+Workflow
+--------
+
+Global communication is handled by the Comm class, however most of the actual work
+is delegated to other classes that are instantiated as needed.
+
+At start, Comm will create various handlers (namely UDP and TCP handlers) that
+listen for incoming connections. For TCP, a connection is an actual established TCP
+connection, for UDP it is ANY incoming packet.
+
+Upon receiving a connection, the handler will create a RemoteConnection object that
+holds information how to transfer data via this channel. The RemoteConnection can
+ONLY be used to send out information. Specifically this means that for a connection
+by TCP only 1 (one!) request can be sent to the robot via this channel - subsequent
+commands will be ignored!
+
+If a request is received, it will be dispatched to the Comm class who will notify 
+the registered callbacks. The callback will also receive a reference (actually an
+auto pointer) to the RemoteConnection as this will be used to send a response.

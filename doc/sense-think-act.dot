@@ -1,0 +1,3 @@
+digraph MainLoop {
+	sense->think->act->sense;
+}

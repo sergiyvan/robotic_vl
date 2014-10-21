@@ -1,0 +1,5 @@
+# This file was automatically generated after 250 trials of a PGRL session
+# in order to optimise the following params: ['leglength', 'stepwidth', 'footroll', 'zGain', 'zPhase', 'xPhase', 'ShoulderPhase']
+p = pgrl.pgrl( ['leglength', 'stepwidth', 'footroll', 'zGain', 'zPhase', 'xPhase', 'ShoulderPhase'] , [[220.0, 240.0], [2.0, 20.0], [5.0, 25.0], [1.0, 10.0], [10.0, 50.0], [0.0, 0.499], [0.0, 1.0]] )
+p.setZ_pi(0.053768)
+p.pgrl(10, 0, 700, 5, 0.611111, 0.300000, [0, 0.8964247683294648, 0.6288764218710643, 0.7207377360597512, 0.7293498567745491, 0.20832256182952502, 0.32068168799240215])

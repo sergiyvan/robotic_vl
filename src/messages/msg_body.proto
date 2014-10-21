@@ -1,0 +1,103 @@
+package de.fumanoids.message;
+
+message Body {
+	required uint32 	id 			  = 1;
+	optional Matrix4d 	position 	  = 2;
+	optional uint32 	density 	  = 3;
+	optional BodyType 	type 		  = 4;
+	optional Material	material	  = 5;
+	optional string		name		  = 6;
+	optional bool       isEndeffector = 7;
+	optional uint32     parentID      = 8;
+		
+	extensions 1000 to max;
+}
+
+message Material {
+	optional string name		= 1;
+	
+	// kinematic friction constant
+	optional double kinematic 	= 2;
+
+	// static friction constant
+	optional double static		= 3;
+	
+	// bouncing constant
+	optional double restitution	= 4;
+}
+
+message Matrix4d {
+	optional double x11 = 1  [default = 1];
+	optional double x12 = 2  [default = 0];
+	optional double x13 = 3  [default = 0];
+	optional double x14 = 4  [default = 0];
+	
+	optional double x21 = 5  [default = 0];
+	optional double x22 = 6  [default = 1];
+	optional double x23 = 7  [default = 0];
+	optional double x24 = 8  [default = 0];
+	
+	optional double x31 = 9  [default = 0];
+	optional double x32 = 10 [default = 0];
+	optional double x33 = 11 [default = 1];
+	optional double x34 = 12 [default = 0];
+	
+	optional double x41 = 13 [default = 0];
+	optional double x42 = 14 [default = 0];
+	optional double x43 = 15 [default = 0];
+	optional double x44 = 16 [default = 1];
+}
+
+message Vector3d {
+	optional double x1 = 1 [default = 0];
+	optional double x2 = 2 [default = 0];
+	optional double x3 = 3 [default = 0];
+}
+
+message Tuple {
+        optional double min = 1 [default = 0];
+        optional double max = 2 [default = 0];
+}
+
+// Different Body types
+
+enum BodyType {
+	BOX	        = 1;
+	SPHERE		= 2;
+	CYLINDER	= 3;
+	COMPOUND	= 4;
+	EXTERNAL    = 5;
+}
+
+message BodyBox {
+	extend Body {
+		optional float width 	= 1001;
+		optional float height 	= 1002;
+		optional float depth 	= 1003;
+	}	
+}
+
+message BodySphere {
+	extend Body {
+		optional float radius	= 1011;
+	}
+}
+message BodyCylinder {
+	extend Body {
+		optional float radius	= 1021;
+		optional float height	= 1022;
+	}
+}
+
+message BodyCompound {
+	extend Body {
+		optional uint32 parentId = 1031;
+		optional uint32 childId	 = 1032;
+	}
+}
+	
+message BodyExternal {
+    extend Body {
+        optional string path     = 1033;
+    }
+}

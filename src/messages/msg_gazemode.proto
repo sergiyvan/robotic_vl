@@ -1,0 +1,12 @@
+package de.fumanoids.message;
+
+enum GAZEMODE {
+	GAZE_FOCUS_NONE           = 0;
+	GAZE_FOCUS_BALL           = 1;
+	GAZE_FOCUS_FEET           = 2;
+	GAZE_FOCUS_LANDMARKS      = 3;
+	GAZE_FOCUS_BALL_ONLY      = 4;
+	GAZE_FOCUS_STARE          = 5;
+	GAZE_FOCUS_SEARCH         = 6;
+	GAZE_FOCUS_CHECKOWNGOAL   = 7;
+}

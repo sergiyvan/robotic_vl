@@ -1,0 +1,74 @@
+/* FUmanoid Debugging Commands
+**
+**
+*/
+
+package de.fumanoids.message;
+
+import "msg_message.proto";
+
+message DebuggingCommands {
+
+	enum DebuggingOptionType {
+		TEXT               = 1;
+		WM_DEPRECATED      = 2;
+		PLOTTER            = 3;
+		TABLE              = 4;
+		DRAWING_CAMERA     = 5;
+		DRAWING_FIELD      = 6;
+		DRAWING_RELATIVE   = 7;
+		DRAWING_VGA        = 8;
+		STOPWATCH          = 10;
+		PLOTTER3D          = 11;
+	}
+
+	message PlotterParams {
+		optional double lowestValue  = 1; // lowest value for range axis
+		optional double highestValue = 2; // highest value for range axis
+		optional double stepInterval = 3; // interval that the range axis should be labelled
+
+		optional string yAxisName    = 4; // label for the range axis
+		optional string xAxisName    = 5; // label for the domain axis
+
+		optional bool   xAxisIsTime  = 6; // set if domain range is the time (in ms)
+	}
+
+	message DebuggingOption {
+		optional string name = 1;
+		optional DebuggingOptionType type = 2;
+		optional bool enabled = 3;
+		
+		optional string description = 5;
+		optional string srcLocation = 6;
+
+		optional PlotterParams plotterParams = 4;
+	}
+
+	message OptionPush {
+		repeated DebuggingOption options = 1;
+	}
+
+	message OptionEnable {
+		repeated string options = 1;
+	}
+
+	message OptionDisable {
+		repeated string options = 1;
+	}
+
+	optional OptionPush    optionPush    = 1;
+	optional bool          optionPull    = 2;
+	optional OptionEnable  optionEnable  = 3;
+	optional OptionDisable optionDisable = 4;
+}
+
+
+/*------------------------------------------------------------------------------------------------*/
+
+/*
+** Extend Message to contain debugging commands
+*/
+
+extend Message {
+	optional DebuggingCommands     debuggingCommands = 12;
+}

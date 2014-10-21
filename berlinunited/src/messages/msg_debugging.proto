@@ -1,0 +1,74 @@
+/* FUmanoid Debugging
+**
+**
+*/
+
+package de.fumanoids.message;
+
+import "msg_message.proto";
+import "msg_drawing.proto";
+import "msg_3d.proto";
+
+message Debugging {
+
+	message OptionText {
+		optional string option  = 1;
+		optional string payload = 2;
+	}
+
+	message OptionPlotter {
+		optional string option = 1;
+		optional string series = 2;
+		optional double x      = 3;
+		optional double y      = 4;
+	}
+
+	message Option3D {
+		optional string  option = 1;
+		optional Debug3D data   = 2;
+	}
+
+	message OptionTable {
+		optional string option  = 1;
+		optional string key     = 2;
+		optional string payload = 3;
+	}
+
+	message OptionDrawing {
+		required string  option      = 1;
+		required int32   frameNumber = 2;
+		repeated Drawing drawings    = 3;
+		optional uint32  imageType   = 4 [ default = 0 ];;
+	}
+
+	message OptionStopwatch {
+		message StopwatchValues {
+			required string  name        = 1;
+			required uint32  duration    = 2;
+			optional uint32  minimum     = 3;
+			optional uint32  maximum     = 4;
+			optional uint32  mean        = 5;
+		}
+
+		required string          option  = 1;
+		repeated StopwatchValues values  = 2;
+	}
+
+	optional OptionText        optionText        = 1;
+	optional OptionPlotter     optionPlotter     = 3;
+	optional OptionTable       optionTable       = 4;
+	repeated OptionDrawing     optionDrawing     = 5;
+	repeated OptionStopwatch   optionStopwatch   = 6;
+	optional Option3D          option3D          = 7;
+}
+
+
+/*------------------------------------------------------------------------------------------------*/
+
+/*
+** Extend Message to contain debug infos
+*/
+
+extend Message {
+	optional Debugging         debugging         = 11;
+}

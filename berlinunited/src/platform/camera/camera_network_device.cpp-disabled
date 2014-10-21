@@ -1,0 +1,464 @@
+/*
+ ** This class connects to a network camera via TCP (or similar).
+ **
+ ** Protocol:
+ ** - recipient has to request data
+ ** - each transmission (both directions) starts with a dynamic header
+ **
+ */
+
+#include "camera_network_device.h"
+#include "services.h"
+#include "management/config/config.h"
+#include "communication/protobuf/msg_network_camera.pb.h"
+
+#include <string>
+
+#define BPC 1
+
+/*------------------------------------------------------------------------------------------------*/
+
+/**
+ ** Constructor called by Singleton getInstance()
+ */
+
+CameraNetworkDevice::CameraNetworkDevice()
+	: imageWidth (0)
+	, imageHeight (0)
+	, imageSize(0)
+	, captureBufferIndex(0)
+	, exportedBufferIndex(255)
+	, frameCounter (0)
+	, lastSettingChange(0)
+{
+	std::string host = services.getConfig().getStrValue("camera.remote.ip", "192.168.1.100");
+	int port = 23232; // services.getConfig().getIntValue("camera.remote.port", 23232);
+	transport = new TransportTCP(port, host.c_str());
+
+	INFO("CameraNetworkDevice started with remote host %s on port %d", host.c_str(), port);
+}
+
+
+/*------------------------------------------------------------------------------------------------*/
+
+/**
+ * Starting the device == opening a socket
+ * @return -1 for socket error
+ */
+bool CameraNetworkDevice::startCamera(int width, int height) {
+	this->imageWidth = width;
+	this->imageHeight = height;
+
+	// SETUP BUFFERS
+	for (int i = 0; i < NetworkCamBufferCount; i++) {
+		imageBuffer[i].maxDataSize = width*height*BPC;
+		imageBuffer[i].data = (uint8_t*)malloc(imageBuffer[i].maxDataSize);
+	}
+
+	if (transport->open()) {
+		run();
+		return true;
+	} else {
+		ERROR("Connection to remote camera couldn't be initialized");
+		return false;
+	}
+}
+
+
+/*------------------------------------------------------------------------------------------------*/
+
+/**
+ */
+
+void CameraNetworkDevice::stopCamera() {
+	camera::message::CameraRequest request;
+	request.set_shutdown(true);
+	sendRequest(request);
+
+	cancel(true);
+	transport->close();
+}
+
+
+/*------------------------------------------------------------------------------------------------*/
+
+/**
+ */
+
+static int avgTime = 0;
+static int counter = 0;
+
+uint8_t* CameraNetworkDevice::getBuffer() {
+	robottime_t start = getCurrentTime();
+
+	// wait for frame to be captured (may exit right away if we have a frame buffered)
+	frameCapturedEvent.wait();
+
+	// clear event
+	frameCapturedEvent.reset();
+
+	bool foundBuffer = false;
+	uint8_t oldImageBufferIdx = exportedBufferIndex;
+
+	// get last frame captured
+	for (int i=0; i < NetworkCamBufferCount; i++) {
+		int idx = (captureBufferIndex + NetworkCamBufferCount - i - 1) % NetworkCamBufferCount;
+		if (imageBuffer[idx].active && imageBuffer[idx].filled) {
+			foundBuffer  = true;
+			exportedBufferIndex = idx;
+			imageBuffer[exportedBufferIndex].active = false;
+//			printf("got buffer %d\n", exportedBufferIndex);
+			break;
+		}
+	}
+
+	if (foundBuffer == false)
+		ERROR("Could not find a new image buffered even though we got a capture event.");
+
+	if (oldImageBufferIdx != 255) {
+		//memset(imageBuffer[oldImageBufferIdx].data, 0, imageBuffer[oldImageBufferIdx].maxDataSize);
+		imageBuffer[oldImageBufferIdx].filled = false;
+		imageBuffer[oldImageBufferIdx].active = true;
+//		printf("re-enabled buffer %d\n", oldImageBufferIdx);
+	}
+
+	avgTime += getCurrentTime() - start;
+	counter++;
+//	if (counter % 50 == 0)
+//		printf("avg wait time for image (low-level): %d ms\n", avgTime/counter);
+
+	return (uint8_t*) imageBuffer[exportedBufferIndex].data;
+}
+
+
+/*------------------------------------------------------------------------------------------------*/
+
+/** Gets a camera setting.
+ **
+ ** @param setting   Camera setting to get
+ */
+
+int32_t CameraNetworkDevice::getSetting(CAMERA_SETTING setting) {
+	NETCAM_SETTING newSettingType = convertSettingType(setting);
+	if ((int)newSettingType == -1)
+		return -1;
+	else
+		return settings[newSettingType];
+}
+
+
+/*------------------------------------------------------------------------------------------------*/
+
+/** Sets a camera setting.
+ **
+ ** @param setting   Camera setting to set
+ ** @param value     Value to set
+ */
+
+void CameraNetworkDevice::setSetting(CAMERA_SETTING setting, int32_t value) {
+	NETCAM_SETTING newSettingType = convertSettingType(setting);
+	if ((int)newSettingType != -1) {
+		settings[newSettingType] = value;
+		lastSettingChange = getCurrentTime();
+	}
+}
+
+
+/*------------------------------------------------------------------------------------------------*/
+
+/**
+ **
+ **
+ */
+
+NETCAM_SETTING CameraNetworkDevice::convertSettingType(CAMERA_SETTING setting) {
+	using namespace camera::message;
+
+	switch (setting) {
+	case CAMERA_GAIN:                return CAMERA_SETTING_GAIN;
+	case CAMERA_R_GAIN:              return CAMERA_SETTING_GAIN_R;
+	case CAMERA_G_GAIN:              return CAMERA_SETTING_GAIN_G;
+	case CAMERA_B_GAIN:              return CAMERA_SETTING_GAIN_B;
+	case CAMERA_EXPOSURE:            return CAMERA_SETTING_EXPOSURE;
+	case CAMERA_START_X:             return CAMERA_SETTING_OFFSET_X;
+	case CAMERA_START_Y:             return CAMERA_SETTING_OFFSET_Y;
+	case CAMERA_WIDTH:               return CAMERA_SETTING_WIDTH;
+	case CAMERA_HEIGHT:              return CAMERA_SETTING_HEIGHT;
+	case CAMERA_ROTATE_IMAGE:        return CAMERA_SETTING_ROTATE_IMAGE;
+	default:                         return (NETCAM_SETTING)-11;
+	}
+}
+
+
+/*------------------------------------------------------------------------------------------------*/
+
+/**
+ ** Device thread, handles all camera communication.
+ */
+
+void CameraNetworkDevice::threadMain() {
+	int16_t errorCount = 0;
+
+	while (isRunning()) {
+		imageSize = imageWidth * imageHeight * BPC;
+
+		// if connection is down, stop device
+		if (false == transport->isConnected()) {
+			ERROR("Camera network device shutting down as transport is not up");
+			transport->close();
+			return;
+		}
+
+		// if the error count is too high, abort connection and hope the camera
+		// will be reset when we connect again
+		if (errorCount > 5) {
+			ERROR("Camera network device shutting down as error count is too high");
+			transport->close();
+			return;
+		}
+
+		// if settings have changed, perform an update (we waited in order to
+		// preferably send all changes in one go to the camera)
+		if (lastSettingChange > 0 && lastSettingChange + 250 < getCurrentTime()) {
+			sendSettings();
+			lastSettingChange = 0;
+		}
+
+		// read size of protobuf message
+		uint32_t length;
+		uint32_t received = transport->read((uint8_t*)&length, sizeof length);
+
+		// ignore if we read nothing or if the package size is zero
+		if (received == 0) {
+			errorCount++;
+			continue;
+		}
+
+		// ignore empty packages
+		if (length == 0) {
+			continue;
+		}
+
+		// read message
+		void* msgData = malloc(length);
+		if (msgData == 0) {
+			ERROR("Out of memory while reading camera package from network");
+			continue;
+		}
+
+		delay(50);
+		received = transport->read((uint8_t*)msgData, length);
+		if (received != length) {
+			WARNING("Only read %d out of %d bytes from camera", received, length);
+			errorCount++;
+			free(msgData);
+			continue;
+		}
+
+		// deserialize
+		camera::message::CameraPackage msg;
+		msg.ParseFromArray(msgData, length);
+		free(msgData);
+
+		if (msg.IsInitialized() == false) {
+			WARNING("Received incomplete message from camera");
+			errorCount++;
+			continue;
+		}
+
+		// all seems to be fine so far, reset error count
+		errorCount = 0;
+
+		if (msg.has_log())
+			handleLog();
+
+		if (msg.has_image())
+			handleIncomingImage(msg.image());
+
+		for (int i = 0;i < msg.parameters_size(); i++) {
+			settings[msg.parameters(i).settingtype()] = msg.parameters(i).settingvalue();
+		}
+	}
+}
+
+
+/*------------------------------------------------------------------------------------------------*/
+
+/**
+ ** Device thread, handles all camera communication.
+ */
+
+void CameraNetworkDevice::handleLog() {
+	uint16_t  logLength;
+	uint8_t   logType = 0;
+	char      logMessage[1024];
+
+	if (sizeof logLength != transport->read((uint8_t*)&logLength, sizeof logLength))
+		return;
+
+	if (logLength > 1024) {
+
+	}
+
+	// receive logLength bytes
+
+	switch (logType) {
+	case 0:
+		ERROR(logMessage);
+		break;
+
+	case 1:
+		WARNING(logMessage);
+		break;
+
+	case 2:
+		INFO(logMessage);
+		break;
+	}
+}
+
+
+/*------------------------------------------------------------------------------------------------*/
+
+/**
+ ** Device thread, handles all camera communication.
+ */
+
+void CameraNetworkDevice::handleIncomingImage(const camera::message::ImagePackage &imagePackage) {
+	imageWidth  = imagePackage.image().width();
+	imageHeight = imagePackage.image().height();
+
+//	if (imagePackage.image().width() != imageWidth)
+//		printf("Image width mismatch: got %d but expected %d\n", imagePackage.image().width(), imageWidth);
+//	if (imagePackage.image().height() != imageHeight)
+//		printf("Image height mismatch: got %d but expected %d\n", imagePackage.image().height(), imageHeight);
+
+	NetworkCameraImageBuffer &buffer = imageBuffer[captureBufferIndex];
+	assert(imagePackage.image().imagedata().length() <= (unsigned)buffer.maxDataSize);
+	if (imagePackage.image().imagetype() == camera::message::TYPE_BAYER) {
+		memcpy(buffer.data, imagePackage.image().imagedata().c_str(), imagePackage.image().imagedata().length());
+	} else if (imagePackage.image().imagetype() == camera::message::TYPE_RGB) {
+		memcpy(buffer.data, imagePackage.image().imagedata().c_str(), imagePackage.image().imagedata().length());
+	} else if (imagePackage.image().imagetype() == camera::message::TYPE_BAYER_CENTER) {
+		const uint8_t *data    = (const uint8_t*)imagePackage.image().imagedata().c_str();
+		const uint8_t *dataEnd = (const uint8_t*)imagePackage.image().imagedata().c_str() + imagePackage.image().imagedata().length();
+		printf("bayer center image in %d bytes\n", (int)imagePackage.image().imagedata().length());
+
+		// set image to black
+		memset(buffer.data, 0, imageWidth * imageHeight);
+		int32_t bytesRead = 0;
+		int16_t lastY = -1;
+		UNUSED(lastY);
+		while (data < dataEnd) {
+			uint16_t y, xMin, xMax;
+			memcpy(&y,    data,     2);
+			memcpy(&xMin, data + 2, 2);
+			memcpy(&xMax, data + 4, 2);
+			printf("line % 3d from % 3d to % 3d\n", y, xMin, xMax);
+
+			// copy the data to the row
+			memcpy(buffer.data + y*imageWidth + xMin, data + 6, xMax - xMin + 1);
+			data += 6 + xMax - xMin + 1;
+			lastY = y;
+			bytesRead += 6 + xMax - xMin + 1;
+		}
+		printf("copy done, parsed %d bytes\n", bytesRead);
+	}
+
+	// select next buffer to use
+	counter++;
+	for (int i=0; i < NetworkCamBufferCount; i++) {
+		int idx = (captureBufferIndex + i + 1) % NetworkCamBufferCount;
+		if (imageBuffer[idx].active) {
+			captureBufferIndex = idx;
+			imageBuffer[idx].filled = false;
+			imageBuffer[idx].dataLength = 0;
+			break;
+		}
+	}
+
+	// mark image as finished
+	buffer.filled = true;
+
+	// raise signal that we got an image
+	frameCapturedEvent.trigger();
+
+	frameCounter++;
+//	newFrameEvent.trigger();
+
+//	if (counter % 50 == 0) {
+//		int fps = (counter / ((getCurrentTime() - start) / 1000));
+//		printf("fps: %d\n", fps);
+//	}
+}
+
+
+/*------------------------------------------------------------------------------------------------*/
+
+/**
+ ** Requests white balance
+ */
+
+void CameraNetworkDevice::sendRequest(const camera::message::CameraRequest &request) {
+	int32_t  requestSize = request.ByteSize();
+	uint8_t *buffer      = (uint8_t*)malloc(requestSize);
+
+	if (buffer == 0) {
+		ERROR("Could not allocate memory to send request to camera");
+		return;
+	}
+
+	request.SerializeToArray(buffer, requestSize);
+	transport->write((uint8_t*)&requestSize, 4);
+	transport->write(buffer,                 requestSize);
+}
+
+
+/*------------------------------------------------------------------------------------------------*/
+
+/**
+ ** Requests white balance
+ */
+
+void CameraNetworkDevice::whiteBalance(int16_t x, int16_t y, int16_t width, int16_t height) {
+	camera::message::CameraRequest request;
+	request.mutable_whitebalance()->set_offsetx(x);
+	request.mutable_whitebalance()->set_offsety(y);
+	request.mutable_whitebalance()->set_width(width);
+	request.mutable_whitebalance()->set_height(height);
+
+	sendRequest(request);
+}
+
+
+/*------------------------------------------------------------------------------------------------*/
+
+/**
+ ** Send camera settings to the camera
+ */
+
+void CameraNetworkDevice::sendSettings() {
+	camera::message::CameraRequest request;
+
+	std::map<NETCAM_SETTING, int32_t>::const_iterator it;
+	for (it = settings.begin(); it != settings.end(); it++) {
+		camera::message::CameraParameter *parameter = request.add_parameters();
+		parameter->set_settingtype(it->first);
+		parameter->set_settingvalue(it->second);
+	}
+
+	sendRequest(request);
+}
+
+
+/*------------------------------------------------------------------------------------------------*/
+
+/**
+ **
+ */
+
+void CameraNetworkDevice::refreshCameraParameters() {
+	camera::message::CameraRequest request;
+	request.set_retrieveparams(true);
+	sendRequest(request);
+}

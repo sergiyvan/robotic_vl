@@ -1,0 +1,42 @@
+Documentation for Image Debugging
+=================================
+
+Background
+----------
+
+For the purpose of debugging a vision system, the most helpful way to provide
+information on what's going on is an image. The user can easily see what was
+visible to the software, and the software can draw in the camera image to mark
+objects that were found, considered or discarded.
+
+For that reason we implement a means to stream images from the robot to a 
+remote location.
+
+
+Technology
+----------
+
+In the past our image debugging was heavily based on using OpenCV's ShowImage
+function which required images to be streamed over the network using X Windows
+Forwarding. This was slow (to say the least). Extending install.py to show the
+same images gave additional leeway, however the underlying concept was broken
+in general. Every new debug view required assigning a new shortcut to 'display'
+and generously extending the ImagePresenter class which combined ALL of the
+image drawing. Worse, external viewers had to be extended (e.g. install.py) to
+know about the new image that was now available. At the end, ImagePresenter
+grew terribly huge and unmaintainable. As an added problem, all images were
+created on the robot and even non-changing images like a field scheme had to
+be streamed wirelessly.
+
+For this very reason, the current approach focusses on two main areas:
+ - keep code that creates visual output to the places (classes) that know
+   about it, so each code is easily understandable and maintainable
+ - provide a separation between images and drawings on them, allowing to
+   switch between representations on the fly
+ - only sent out the data that is really required - i.e. only images that do
+   actually show camera contents, but not field sketches or similar
+
+
+Implementation
+--------------
+

@@ -1,0 +1,68 @@
+package de.fumanoids.message;
+
+import "msg_body.proto";
+import "msg_sensor.proto";
+
+message Link {
+
+	enum LinkType {
+		REVOLUTE	= 1;
+		PRISMATIC	= 2;
+		SPHERICAL	= 3;
+	}
+
+	optional uint32		id	                  = 1;
+	repeated uint32 	childIDs		      = 2;
+	optional Vector3d	position	          = 3;
+	optional Vector3d	axis		          = 4;
+	
+	//space for more relevant fields
+	
+	optional uint32		motorID		          = 10;
+	
+	optional LinkType	type 		          = 15;
+	optional string	    name                  = 20;
+	
+	//regions that will cause collisions in degree
+	repeated Tuple      collidingRegions      = 21;
+	
+	//defines links that rotate when this link rotates (e.g. for mechanical reasons)
+	repeated uint32     parallelLinkIDs       = 22;
+	//if this link is part of a parallel kinematics this field specifies the opponent link
+	optional uint32     parallelOponentLinkID = 23; 
+
+	//body representing this link, this body will not be rotated by this link
+	optional int32      bodyID                = 24;
+	
+	//defines if the body is rotated by this link or not
+	optional bool       bodyIsChild           = 25 [default = false];
+}
+
+
+message Motor {
+	extend Sensor {
+		
+		// default values are from the RX64
+		optional double   motorTorque         = 1001 [default = 6.44]; 
+		optional double   backEMF	          = 1002 [default = 4.23];
+		optional double   armatureResistance  = 1003 [default = 15];
+		optional string   type                = 1004 [default = "RX-64"];
+		
+		//range which can be reached by the motor in degree, e.g. 0 to 300
+        optional Tuple    workingAngle        = 1005;
+
+		//value region which the motor uses, e.g. 0 to 1023
+		optional Tuple    valueRegion         = 1006;
+		
+		//motor value for the initial position of the motor in the model
+		//this is not the idle position of this motor!
+		//it defines indirectly where the motors working region starts and ends
+		optional uint32   modelInit           = 1007;
+		
+		//idle position of this motor
+		optional uint32   motorIdle           = 1008;
+		
+		//specifies if the motor rotates counter-clock-wise (default) or clock-wise
+		optional bool     ccwRotation         = 1009 [default = true];
+	}
+}

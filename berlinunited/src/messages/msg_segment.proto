@@ -1,0 +1,29 @@
+/* Protocol Buffer definition for segmentation of data
+**
+** This protobuf message is used to encapsulate a part of a larger message
+** that would not fit into a single message (e.g. when sending via UDP).
+** 
+*/
+
+package de.fumanoids.message;
+
+import "msg_message.proto";
+
+
+/*------------------------------------------------------------------------------------------------*/
+
+message MessageSegment {
+	required uint64   id                = 1;
+	required uint32   packageNumber     = 2;
+	required uint32   totalPackageCount = 3;
+
+	required bytes    payload           = 4;
+}
+
+
+/*------------------------------------------------------------------------------------------------*/
+
+
+extend Message {
+	optional MessageSegment messageSegment = 28;
+}

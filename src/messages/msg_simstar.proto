@@ -1,0 +1,121 @@
+/* Messages used by SimStar
+**
+*/
+
+package de.fumanoids.message;
+
+import "msg_position.proto";
+import "msg_connection.proto";
+import "msg_message.proto";
+
+
+message SimStarConnect {
+
+	// SensorSelection
+	message SensorConnection {
+	
+		enum SensorType {
+			SENTYPE_CAMERA       = 10;
+			SENTYPE_SENSORSET    = 11;
+			SENTYPE_MOTIONSTATUS = 12;
+			SENTYPE_GROUNDTRUTH  = 13;
+			SENTYPE_MSGHUB       = 14;
+		}
+	
+		message PropertyValue {
+			optional int32      value_int   = 10;
+			optional string     value_str   = 11;
+			optional bool       value_bool  = 12;
+		}
+	
+		message SensorProperty {
+			// value type definition (used below)
+			enum ValueType {
+				INTEGER = 10;
+				STRING  = 11;
+				BOOLEAN = 12;
+			}
+		
+			// key (name of option)
+			required string key 		= 1;
+		
+			// data type of configuration value (int, string, etc)
+			required ValueType type 	= 2;
+		
+			// value
+			required PropertyValue value = 3;
+		}
+	
+		required int32          sensorID     = 1;
+		required Connection     connection   = 2;
+		repeated SensorProperty properties   = 3;
+		required SensorType 	sensorType   = 4;
+	}
+
+	// Request from client (robot control software)
+	message ClientMessage {
+	
+		// basic settings
+		required int32   robotID              = 1;
+		optional int32   clientCommPort       = 2;
+		
+		// RbtDescFile
+		optional string  rdfName              = 3;
+		
+		// Sensor selection
+		repeated SensorConnection connections = 4; 	
+	}
+	
+	
+	// SimStar response, can be seen as an ACK
+	message ServerMessage {
+	
+		// acknowledgement: sensors initialised, connection pending
+		repeated SensorConnection connections = 1; 
+	}
+
+	optional ClientMessage client = 1;
+	optional ServerMessage server = 2;
+}
+
+
+message SimMotionStatus {
+
+	message KickParam {
+ 		enum LegType {
+ 			KICK_NONE   = 10;
+			KICK_LEFT   = 11;
+			KICK_RIGHT  = 12;
+		}
+		
+		required LegType  leg				= 1; 
+	}
+	
+	message WalkerParam {
+ 		required int32   forward            = 1;
+ 		required int32   sideward           = 2;
+ 		required int32   rotation           = 3;
+	}
+	
+	enum MotionType {
+		SIM_MOTION_NONE                    = 1;    /// default value
+		SIM_MOTION_REMOTE                  = 2;   /// remote transmitted motion
+		SIM_MOTION_STAND_IDLE              = 3;   /// idle motion
+		SIM_MOTION_LOCOMOTION              = 4;   /// move the robot (walk, drive, fly, swim, etc)
+		SIM_MOTION_KICK                    = 5;   /// kick (adjustable by parameters)
+		SIM_MOTION_STANDUP_FRONT           = 6;   /// standup from front
+		SIM_MOTION_STANDUP_BACK            = 7;   /// standup from back
+		SIM_MOTION_PREPARE_STANDUP_FRONT   = 8;   /// prepare standup motion from front
+		SIM_MOTION_PREPARE_STANDUP_BACK    = 9;   /// prepare standup motion from back
+	}
+ 		
+	required int32       robotID            = 1;
+	required MotionType  mType              = 2;
+	
+	optional WalkerParam wParam				= 3;
+	optional KickParam   kParam				= 4;
+}
+
+extend Message {
+	optional SimMotionStatus simMotionStatus = 10;
+}

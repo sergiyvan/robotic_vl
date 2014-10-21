@@ -1,0 +1,2 @@
+import msg_message_pb2
+import msg_image_pb2

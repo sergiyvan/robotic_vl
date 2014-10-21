@@ -1,0 +1,27 @@
+/* 
+** Main container class.
+**
+*/
+
+/* TODO: switch to org.berlinunited namespace? */
+package de.fumanoids.message;
+
+
+message Message {
+	required int32                 robotID         = 1 [ default = -1 ];
+
+	/*
+	** !!! DO NOT ADD ADDITIONAL FIELDS TO THIS MESSAGE !!!
+	**       IF YOU NEED TO ADD DATA, USE AN EXTENSION.
+	**
+	**     see: `bin/next_ext.py <pbdir>`
+	**
+	** * Extensions 2-999 are for BerlinUnited / generic extensions (and
+	**   the pre-existing extensions)
+	** * Extensions 1000-1999 are for the FUmanoids project
+	** * Extensions 2000-2999 are for the Racing Team project
+	*/
+
+	extensions 2 to 99;
+	extensions 101 to max;
+}

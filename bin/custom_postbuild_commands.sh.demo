@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# Here you can add custom commands that get executed after the build
+# 
+# You can update your ctags, get a message via espeak or much more. 
+#
+# Rename the file to custom_prebuild_commands.sh to activate it.
+
+espeak 'compiling done' 2> /dev/null &

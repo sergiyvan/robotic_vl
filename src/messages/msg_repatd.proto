@@ -1,0 +1,46 @@
+message MSG_RL_REPATD {
+
+	// In the model only the ParameterSpaces are needed.
+	// The rest (states and actions) is being inferred.
+	message Model {
+		message StateParameter {
+			required string name            = 1;
+			required int32  minValue        = 2;
+			required int32  maxValue        = 3;
+			required int32  defaultValue    = 4;
+			required int32  radialDistance  = 5;			
+		}
+
+		message ActionParameter {
+			required string name            = 1;
+			required int32  minValue        = 2;
+			required int32  maxValue        = 3;
+			required int32  defaultValue    = 4;
+			required float  impact          = 5;			
+		}
+
+		repeated StateParameter  stateParameter  = 1;
+		repeated ActionParameter actionParameter = 2;
+	}
+
+
+	message Entry {
+		required int32 state  = 1;
+		required int32 action = 2;
+		required float value  = 3;
+	}
+
+
+	message Storage {
+		repeated Entry entry  = 1; // [ deprecated=true ];
+		optional bytes data   = 2;
+	}
+
+
+	required Model model           = 1;
+	required float learningRate    = 2;
+	required float traceDecayRate  = 3;
+	required int32 traceLength     = 4; 
+	required float discountRate    = 5;
+	required Storage Q             = 6;
+}

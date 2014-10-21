@@ -1,0 +1,65 @@
+{
+   Google protobuf leaks in DescriptorPool / operator new(unsigned long)
+   Memcheck:Leak
+   fun:_Znwm
+   ...
+   fun:_ZN6google8protobuf14DescriptorPool24InternalAddGeneratedFile*
+   fun:*protobuf_AddDesc_*
+}
+
+{
+   Google protobuf leaks
+   Memcheck:Leak
+   fun:_Znwm
+   ...
+   fun:_ZN6google8protobuf14MessageFactory29InternalRegisterGeneratedFile*
+}
+
+{
+   Google protobuf leaks
+   Memcheck:Leak
+   fun:_Znwm
+   ...
+   fun:_Z*StaticDescriptorInitializer_*proto*
+   fun:_Z*__static_initialization_and_destruction_*
+}
+
+{
+   Google protobuf leaks
+   Memcheck:Leak
+   fun:_Znwm
+   fun:_ZN6google8protobuf55protobuf_AddDesc_google_2fprotobuf_2fdescriptor_2eprotoEv
+}
+
+{
+   ModuleFramework StaticRequiring/ProvidingRegistrator
+   Memcheck:Leak
+   fun:_Znwm
+   ...
+   fun:*Base*Static*Registrator*
+}
+
+{
+   Debug Framework: Registration of Debug options
+   Memcheck:Leak
+   fun:_Znwm
+   fun:*Debugging*registerDebugOption*DebuggingOptionType*
+}
+
+{
+   Global static members (e.g. Debug options, Config params, etc)
+   Memcheck:Leak
+   fun:_Znwm
+   ...
+   fun:_Z41__static_initialization_and_destruction_0ii
+   fun:_GLOBAL__sub_*
+   fun:__libc_csu_init
+}
+
+{
+   Unknown ioctl in RS232/485 handling
+   Memcheck:Param
+   ioctl(generic)
+   fun:ioctl
+   fun:*TransportSerial*
+}

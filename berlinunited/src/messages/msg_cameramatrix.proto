@@ -1,0 +1,22 @@
+package de.fumanoids.message;
+
+message CameraMatrix {
+	/* Extrinsic parameters */
+	optional int32 offsetX              = 1;
+	optional int32 offsetY              = 2;
+	optional float dynamicHeight        = 3;
+	optional int32 headPitch            = 4;
+	optional int32 headYaw              = 5;
+	repeated float transformationMatrix = 6 [ packed = true ];
+
+	/* Intrinsic parameters */
+	optional uint32 centerX             = 7;
+	optional uint32 centerY             = 8;
+	optional int32  cameraRoll			= 9;
+	optional uint32 focalLengthX        = 10;
+	optional uint32 focalLengthY        = 11;
+	optional float  radialDistCoef1     = 12;
+	optional float  radialDistCoef2     = 13;
+	optional float  tangentialDistCoef1 = 14;
+	optional float  tangentialDistCoef2 = 15;
+}

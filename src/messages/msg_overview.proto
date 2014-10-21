@@ -1,0 +1,79 @@
+package de.fumanoids.message;
+
+import "msg_message.proto";
+import "msg_position.proto";
+import "msg_gazemode.proto";
+import "msg_xabsl.proto";
+
+message CovPoints {
+	required int32   p1_x = 1;
+	required int32   p1_y = 2;
+	required int32   p2_x = 3;
+	required int32   p2_y = 4;
+	required int32   p3_x = 5;
+	required int32   p3_y = 6;
+	required int32   p4_x = 7;
+	required int32   p4_y = 8;
+}
+
+message FieldOfView {
+	required int32   p1_x = 1;
+	required int32   p1_y = 2;
+	required int32   p2_x = 3;
+	required int32   p2_y = 4;
+	required int32   p3_x = 5;
+	required int32   p3_y = 6;
+	required int32   p4_x = 7;
+	required int32   p4_y = 8;
+}
+
+
+message RelativeOverview {
+	optional Position       ballModel           = 1;
+
+	optional Position       oppGoalModelLeft    = 2;
+	optional Position       oppGoalModelRight   = 3;
+
+	optional Position       ownGoalModelLeft    = 4;
+	optional Position       ownGoalModelRight   = 5;
+
+	/* ball position as currently seen */
+	optional Position       ballPercept         = 6;
+	
+	/* goal position as currently seen */
+	optional Position       yellowGoalLeft      = 7;
+	optional Position       yellowGoalRight     = 8;
+	optional Position       yellowGoalUnknown   = 9;
+
+	/* walker speeds set by the behavior */
+	optional int32          walkerSpeedFwd      = 10;
+	optional int32          walkerSpeedSwd      = 11;
+	optional int32          walkerSpeedRot      = 12;
+	optional Position       walkerTarget        = 19;
+	repeated Position       walkerPath          = 20;
+
+	/* "visualization" of coveriance matrix of models */
+	optional CovPoints      ballModelCovariance    = 13;
+	optional CovPoints      oppGoalLeftCovariance  = 14;
+	optional CovPoints      oppGoalRightCovariance = 15;
+	
+	/* relative positions of our field of view */
+	optional FieldOfView    fieldOfView         = 16;
+	
+	/* gaze mode */
+	optional GAZEMODE       gazeMode            = 17;
+
+	/* obstacle model */
+	repeated Position       obstacleModels      = 18;
+	
+	/* behavior */
+	optional BehaviorStatus behaviorStatus      = 21;
+}
+
+/*
+** Extend Message
+*/
+
+extend Message {
+	optional RelativeOverview overview = 110;
+}

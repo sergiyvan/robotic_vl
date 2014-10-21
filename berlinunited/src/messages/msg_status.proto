@@ -1,0 +1,41 @@
+package de.fumanoids.message;
+
+import "msg_message.proto";
+import "msg_position.proto";
+
+message Status {
+	optional uint64          timestamp           = 1;  // timestamp of this message
+	optional uint32          teamID              = 2;  // ID of team the robot belongs to
+	optional uint32          timeOnline          = 3;  // time in milliseconds the robot was online
+
+	// global position of the robot
+	optional Position        robotPosition       = 7;  // absolute position of robot
+	optional double          robotPositionBelief = 8;  // value between 0 and 1.0
+
+	optional string          activeAgent         = 12;
+	optional string          activeRole          = 15;
+	optional string          currentState        = 16;
+
+
+/*
+	// !!! DEPRECATED elements, do NOT USE. DO NOT RECYCLE IDS !!
+	optional ROBOTSTATE      robotState          = 4  [ deprecated = true ];
+	optional ROLE            roleEnumDeprecated  = 5  [ deprecated = true ];
+	optional Posture         posture             = 6  [ deprecated = true ];
+
+	optional Position        ballPositionRel     = 9  [ deprecated = true ];
+	optional GoalColor       teamGoalColor       = 10 [ deprecated = true ];
+	optional CaptainCommands captainCommands     = 11 [ deprecated = true ];
+
+	optional Position        oppGoalLeftRel      = 13 [ deprecated = true ];
+	optional Position        oppGoalRightRel     = 14 [ deprecated = true ];
+*/
+}
+
+/*
+** Extend Message to contain the info for the team
+*/
+
+extend Message {
+	optional Status          status              = 23;
+}

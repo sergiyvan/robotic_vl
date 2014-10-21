@@ -1,0 +1,30 @@
+package de.fumanoids.message;
+
+import "msg_body.proto";
+
+message Sensor {
+
+	enum SensorType {
+		CAMERA 		= 1;
+		PRESSURE 	= 2;
+		MOTOR		= 3;
+		GYRO 		= 4;
+		SERIAL_BUS	= 100;
+		WORLDMODEL	= 110;
+	}
+	required uint32 	id        = 1;
+	optional uint32 	bodyId    = 2;
+	optional Matrix4d 	Position  = 3;
+	optional SensorType type      = 4;
+	
+	extensions 1000 to max;
+	 
+}
+
+
+
+message SerialBus {
+	extend Sensor {
+		repeated Sensor SensorsOnBus = 1000;
+	}
+}	

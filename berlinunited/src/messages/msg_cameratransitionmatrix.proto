@@ -1,0 +1,31 @@
+package de.fumanoids.message;
+
+/*------------------------------------------------------------------------------------------------*/
+
+/* camera transition matrix pro relative projection
+**
+*/
+
+message CameraTransitionMatrix {
+	optional float value00        = 1;
+	optional float value01        = 2;
+	optional float value02        = 3;
+	optional float value03        = 4;
+
+	optional float value10        = 5;
+	optional float value11        = 6;
+	optional float value12        = 7;
+	optional float value13        = 8;
+
+	optional float value20        = 9;
+	optional float value21        = 10;
+	optional float value22        = 11;
+	optional float value23        = 12;
+
+	optional float value30        = 13;
+	optional float value31        = 14;
+	optional float value32        = 15;
+	optional float value33        = 16;
+
+	optional uint64 timestamp     = 21;
+}

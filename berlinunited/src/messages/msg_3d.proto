@@ -1,0 +1,99 @@
+/* Protocol Buffer definition for a drawing.
+**
+** Drawings are used to visualize information, e.g. by drawing on a camera image or on a blank canvas.
+** Due to the different possibilities to draw and the varying coordinate systems in use, a number of
+** possible canvasses is defined and must be known to make sense of the pixel coordinates as they will
+** have to be interpreted differently depending on the canvas being used.
+*/
+
+package de.fumanoids.message;
+
+import "msg_message.proto";
+
+
+
+/*------------------------------------------------------------------------------------------------*/
+
+/* 
+*/
+
+message Debug3D {
+	repeated Debug3DCommand commands = 1;
+}
+
+
+/*------------------------------------------------------------------------------------------------*/
+
+/* A single draw operation (only one of the optional values should be included!) with no information
+** about the canvas to be used.
+*/
+
+message Debug3DCommand {
+	/* color to be used, RGB with values in [0,255] */
+	message Color {
+		required int32 r = 1;
+		required int32 g = 2;
+		required int32 b = 3;
+	}
+
+	message Circle3D {
+		required float x      = 1;
+		required float y      = 2;
+		required float z      = 3;
+		required float  radius = 4;
+		optional bool   filled = 5 [ default = false ];
+		optional int32  alpha  = 6 [ default = 255 ];
+	}
+
+	message Axes3D {
+		required bool on = 1;
+	}
+
+	message Line3D {
+		required float x1     = 1;
+		required float y1     = 2;
+		required float z1     = 3;
+		required float x2     = 4;
+		required float y2     = 5;
+		required float z2     = 6;
+	}
+
+	message Plane3D {
+		required float x      = 1;
+		required float y      = 2;
+		required float z      = 3;
+		required float nx     = 4;
+		required float ny     = 5;
+		required float nz     = 6;
+		required float d      = 7;
+	}
+
+	message Point3D {
+		required float x      = 1;
+		required float y      = 2;
+		required float z      = 3;
+	}
+
+	message Gauss3D {
+		optional float x = 1;
+		optional float y = 2;
+		optional float z = 3;
+		optional float cov11 = 4;
+		optional float cov12 = 5;
+		optional float cov13 = 6;
+		optional float cov21 = 7;
+		optional float cov22 = 8;
+		optional float cov23 = 9;
+		optional float cov31 = 10;
+		optional float cov32 = 11;
+		optional float cov33 = 12;
+	}
+
+	optional Point3D     point3d      = 1;
+	optional Axes3D      axes3d       = 2;
+	optional Line3D      line3d       = 3;
+	optional Circle3D    circle3d     = 4;
+	optional Gauss3D     gauss3d      = 5;
+	optional Color       color        = 6;
+	optional Plane3D     plane        = 7;
+}

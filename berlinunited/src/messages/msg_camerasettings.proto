@@ -1,0 +1,59 @@
+/* FUmanoid Protocol Buffer definition for camera settings
+**
+** 
+*/
+
+package de.fumanoids.message;
+
+import "msg_message.proto";
+
+
+/*------------------------------------------------------------------------------------------------*/
+
+/* Camera settings
+** 
+*/
+
+message CameraParameter {
+	required string name         = 1; // name of setting
+	required int32  value        = 2; // value to use
+	optional int32  min          = 3; // minimum value
+	optional int32  max          = 4; // maximum value
+	optional int32  defaultValue = 5; // default value
+
+	optional int32  id           = 6; // id of the setting (precedence over name actually)
+}
+
+message CameraSettings {
+	repeated CameraParameter cameraParameters = 1;
+}
+
+
+/*------------------------------------------------------------------------------------------------*/
+
+/* 
+** 
+*/ 
+
+message CameraSettingsRequest {
+	// camera settings exchange
+	optional CameraSettings      settings             = 1; // camera settings
+
+	// from server (e.g. CameraCalibration, FUremote) to client
+	optional bool                getSettings          = 2 [ default = false ]; // request to send settings
+	optional bool                setSettings          = 3 [ default = false ]; // request to set settings
+
+	// from client to server (acknowledgments)
+	optional bool                settingsWereSet      = 5 [ default = false ]; // information that settings were set
+}
+
+
+/*------------------------------------------------------------------------------------------------*/
+
+/*
+** Extend Message to allow exchange of calibration
+*/
+
+extend Message {
+	optional CameraSettingsRequest  cameraSettingsRequest = 20;
+}

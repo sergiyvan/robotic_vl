@@ -1,0 +1,121 @@
+/*
+ * sim_cameraDevice.h
+ *
+ * Class for communication between FUmanoid program and simulation software
+ * This class receives simulated camera pictures through an UNIX or TCP Socket
+ *
+ */
+
+#ifndef CAMERA_NETWORK_DEVICE_H_
+#define CAMERA_NETWORK_DEVICE_H_
+
+#include "platform/system/thread.h"
+#include "utils/patterns/singleton.h"
+#include "camera.h"
+
+#include "platform/system/transport/transport_tcp.h"
+
+#include "communication/protobuf/msg_network_camera.pb.h"
+
+
+const int NetworkCamBufferCount = 3;
+
+typedef camera::message::CameraSetting NETCAM_SETTING;
+
+
+/*------------------------------------------------------------------------------------------------*/
+
+class NetworkCameraImageBuffer {
+public:
+	bool     active;      // whether this buffer is active
+	bool     filled;      // whether this buffer is filled with an image
+
+	uint8_t* data;        // image data
+	int      maxDataSize; // maximum allocated memory for image data
+	int      dataLength;  // current write position in stream
+
+	robottime_t startCapture;
+
+	NetworkCameraImageBuffer()
+		: active(true)
+		, filled(false)
+		, data(0)
+		, maxDataSize(0)
+		, dataLength(0)
+		, startCapture(0)
+	{}
+};
+
+
+/*------------------------------------------------------------------------------------------------*/
+
+class CameraNetworkDevice : public Singleton<CameraNetworkDevice>, public Thread {
+
+private:
+	CameraNetworkDevice();
+	friend class Singleton<CameraNetworkDevice>;
+
+	void handleLog();
+	void handleIncomingImage(const camera::message::ImagePackage &imagePackage);
+
+	void sendRequest(const camera::message::CameraRequest &request);
+
+public:
+	~CameraNetworkDevice() {};
+
+	// overwrite Thread Interface
+	virtual void threadMain();
+	virtual const char* getName() { return "CameraNetworkDevice"; };
+
+	// Camera control (= Socket control)
+	bool startCamera(int width, int height);
+	void stopCamera();
+
+	int32_t getSetting(CAMERA_SETTING setting);
+	void    setSetting(CAMERA_SETTING setting, int32_t value);
+	void    refreshCameraParameters();
+
+	inline bool running() { return transport->isConnected(); };
+
+	uint8_t* getBuffer();
+
+	inline int getImageSize()    { return imageSize;    }
+	inline int getWidth()        { return imageWidth;   }
+	inline int getHeight()       { return imageHeight;  }
+	inline int getFrameCounter() { return frameCounter; }
+
+	void whiteBalance(int16_t x, int16_t y, int16_t width, int16_t height);
+
+//	Event newFrameEvent;
+	ContinousEvent frameCapturedEvent;
+
+protected:
+	TransportTCP *transport;
+
+//	uint8_t *image; // TODO remove
+
+	// general image settings
+	uint16_t imageWidth;
+	uint16_t imageHeight;
+	int      imageSize;
+
+	// buffers of frame data
+	NetworkCameraImageBuffer imageBuffer[NetworkCamBufferCount];
+	uint8_t           captureBufferIndex;
+	uint8_t           exportedBufferIndex;
+
+	// frame information
+	int frameCounter;
+
+	// camera settings
+	std::map<NETCAM_SETTING, int32_t> settings;
+	robottime_t lastSettingChange;
+
+	NETCAM_SETTING convertSettingType(CAMERA_SETTING setting);
+
+//	virtual void requestImage();
+
+	void    sendSettings();
+};
+
+#endif /* CAMERA_NETWORK_DEVICE_H_ */

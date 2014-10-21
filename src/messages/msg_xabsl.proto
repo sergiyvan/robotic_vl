@@ -1,0 +1,68 @@
+/* XABSL debug output
+**
+**
+** (based on NaoTHs structure)
+*/
+
+package de.fumanoids.message;
+
+import "msg_message.proto";
+
+message XABSLParameter {
+	enum ParamType {
+		DecimalType = 0;
+		BooleanType = 1;
+		EnumType    = 2;
+		UnknownType = 3;
+	}
+
+	optional string    name         = 1 [default="unknown"];
+	optional ParamType type         = 2 [default=UnknownType];
+	optional double    decimalValue = 3;
+	optional bool      boolValue    = 4;
+	optional string    enumValue    = 5;
+}
+
+message XABSLAction {
+	enum ActionType {
+		Option              = 0;
+		BasicBehavior       = 1;
+		DecimalOutputSymbol = 2;
+		BooleanOutputSymbol = 3;
+		EnumOutputSymbol    = 4;
+		Unknown             = 5; 
+	}
+
+	optional ActionType     type             = 1 [default=Unknown];
+	optional string         name             = 2 [default="unknown"];
+  
+	// for options
+	optional int64          timeOfExecution  = 3 [default=0];
+	optional string         activeState      = 4;
+  
+	optional int64          stateTime        = 5;
+	repeated XABSLParameter parameters       = 6;
+  
+	repeated XABSLAction    activeSubActions = 7;
+  
+	// for parameters
+	optional double         decimalValue     = 8;
+	optional bool           boolValue        = 9;
+	optional string         enumValue        = 10;
+}
+
+message BehaviorStatus {
+	optional string         agent             = 1;
+	repeated XABSLAction    activeRootActions = 2;
+	repeated XABSLParameter inputSymbols      = 3;
+	repeated XABSLParameter outputSymbols     = 4;
+}
+
+message BehaviorInformation {
+	repeated string         availableAgents   = 1;
+}
+
+extend Message {
+	optional BehaviorStatus      behaviourStatus   = 2;
+	optional BehaviorInformation behaviorInfo      = 9;
+}

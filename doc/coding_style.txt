@@ -1,0 +1,39 @@
+=============================================
+FUmanoid Coding Style and General Coding Tips
+=============================================
+
+For a complete version see:
+https://www.fumanoids.de/redmine/projects/fumanoids/wiki/CodingConventions
+
+
+Keep It Simple, Stupid!
+
+* Identifiers and comments in English.
+
+* ALL_CAPS for defines: MAX_PITCH_VALUE
+* CamelCalse for classes: MyClass
+* camelCase for everything else: myLocalVar
+
+* ONE statement per line.
+* Indentation with TABS.
+* Use newlines to divide code in logical parts.
+* Spaces after 'for', 'while', 'if', etc.: "if (x != 1) {"
+* Keep lines short (try 80 chars), NOT longer than 120 chars.
+* Attach pointer/reference operator (*/&) to the variable type:
+ "MyClass& x = ..."
+
+* Use Doxygen comments
+  * for classes in the header.
+  * for functions where they are implemented, in the *.cpp.
+
+* ONLY declaration in the header, keep it clean.
+* Definition in the *.cpp.
+* Try to keep includes in the headers to a minimum.
+
+* Use References, no pointers (except if you really have to).
+* Use "const" whenever possible.
+* Pass objects as const reference:
+  "void function(const MyClass& instance) {"
+
+Use the formating option of Eclipse or 'astyle' (see tools/astylerc) to format
+your code automatically.

@@ -1,0 +1,142 @@
+/* FUmanoid Protocol Buffer definition for lookup table and calibration
+**
+** 
+*/
+
+package de.fumanoids.message;
+
+import "msg_message.proto";
+import "msg_camerasettings.proto";
+
+
+/*------------------------------------------------------------------------------------------------*/
+
+/* color format 
+**
+*/
+
+enum ColorFormat {
+	YUV = 1;
+	RGB = 2; 
+}
+
+
+/*------------------------------------------------------------------------------------------------*/
+
+/* Marker points
+** 
+*/
+
+message MarkerPoint {
+	required int32 x = 1;
+	required int32 y = 2;
+	required int32 z = 3;
+	required int32 r = 4;
+}
+
+message MarkerPoints {
+	enum MarkerColor {
+		UNKNOWN = 0;
+		RED     = 1;
+		GREEN   = 2;
+		YELLOW  = 3;
+		BLUE    = 4;
+		BLACK   = 5;
+		CYAN    = 6;
+		MAGENTA = 7;
+		WHITE   = 8;
+	}
+
+	required MarkerColor color  = 1;
+	repeated MarkerPoint points = 2;
+	optional ColorFormat format = 3 [ default=YUV ];
+}
+
+
+/*------------------------------------------------------------------------------------------------*/
+
+/* Color lookup table
+** 
+*/ 
+
+message LUT {
+	// size of LUT (bits per color channel)
+	required int32       bpc           = 1;
+
+	required ColorFormat lutFormat     = 2;
+
+	// whether the LUT data is compressed (zlib) 
+	required bool         compressed   = 3 [ default = false ];
+ 
+	// lookup table
+	required bytes        lut          = 4;
+}
+
+
+/*------------------------------------------------------------------------------------------------*/
+
+/* 
+** 
+*/ 
+
+message Calibration {
+	// filename of calibration
+	optional string         filename          = 1;
+
+	// time calibration was last saved
+	optional int64           lastModification = 2; // time of last modification, in milliseconds since 01/01/1970
+	
+	// info string about calibration
+	optional string          notes            = 3;
+	optional string          log              = 12;
+	optional string          location         = 13;
+	optional string          timeOfDayInfo    = 14;
+	optional string          lastModString    = 15; // time of last modification, as string
+
+	// LUT (possibly in many formats)
+	repeated LUT             lut              = 4;
+
+	// markers used for the LUT
+	repeated MarkerPoints    markerPoints     = 5;
+
+	// camera settings
+	optional CameraSettings  cameraSettings   = 6;
+
+	// parameters
+	optional int32           black_max        = 10;
+	optional int32           white_min        = 11;
+
+	optional int32 	         magnitudeThreshold = 16;
+}
+
+
+/*------------------------------------------------------------------------------------------------*/
+
+/* 
+** 
+*/ 
+
+message CalibrationRequest {
+	// calibration exchange
+	optional Calibration         calibration          = 1; // calibration
+
+	// from server (e.g. CameraCalibration, FUremote) to client
+	optional bool                getCalibration       = 2; // request to send calibration
+	optional bool                setCalibration       = 3; // request to set calibration
+	optional bool                saveCalibration      = 4; // request to save calibration
+
+	// from client to server (acknowledgments)
+	optional bool                calibrationWasSet    = 5; // information that calibration was set
+	optional bool                calibrationWasSaved  = 6; // information that calibration was saved
+}
+
+
+/*------------------------------------------------------------------------------------------------*/
+
+/*
+** Extend Message to allow exchange of calibration
+*/
+
+extend Message {
+	optional CalibrationRequest    calibrationRequest   = 19;
+}

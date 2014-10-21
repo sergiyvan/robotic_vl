@@ -1,0 +1,114 @@
+package de.fumanoids.message;
+
+import "msg_message.proto";
+
+
+/*------------------------------------------------------------------------------------------------*/
+
+/** A robot motion defines a full motion for a robot.
+ **
+ */
+
+message MotorMotion {
+
+	enum Interpolation {
+		BEZIER      = 0;
+		B_SPLINES   = 1; // unused
+		NEWTON      = 2; // unused
+		LINEAR      = 3;
+	}
+
+	enum MotorMoveType {
+		MOVE            = 0; // move the motor to the new position
+		INITIALIZATION  = 1; // set the position as initial
+		DISABLED        = 2; // turn off motor (disable torque)
+		DYNAMIC         = 3; // start dynamic motion component (PID)
+	}
+
+	message MotorPosition {
+		required uint32 time = 1; // time in ms since start of motion
+		optional int32 oldValue = 2; // TODO: make deprecated in future (used to be 'required')
+		optional float angle = 3; // angle in degree
+	}
+
+	enum PIDType {
+		GYRO_ROLL   = 0;
+		GYRO_PITCH  = 1;
+		MOTOR_VALUE = 2;
+	}
+
+	// definition of a PID controller
+	message PID {
+		required PIDType type    = 1;
+		required float   desired = 2;
+		optional float   kp      = 3 [default = 0];
+		optional float   ki      = 4 [default = 0];
+		optional float   kd      = 5 [default = 0];
+	}
+
+	message MotorMove {
+		// requested motor position tuple (time, position)
+		required MotorPosition position         = 1;
+
+		// Interpolation from last position to this position.
+		// If this is the first position interpolation is ignored.
+		optional Interpolation interpolation    = 2 [default = BEZIER];
+
+		// optional custom handles for use with bezier interpolation
+		optional MotorPosition leftHandle       = 3;
+		optional MotorPosition rightHandle      = 4;
+
+		// type of movement
+		optional MotorMoveType moveType         = 5 [default = MOVE];
+
+		// specifies pid controller for dynamic parts
+		optional PID           pid              = 6;
+	}
+
+	// ID of motor
+	required int32     motorID    = 1;
+
+	// time to reach the first position (deprecated, use part of type MotorMoveType.INITIALIZATION instead)
+//	optional uint32    initTime   = 2 [ deprecated = true ];
+
+	// all the movements of this motor
+	repeated MotorMove move       = 3;
+}
+
+
+/*------------------------------------------------------------------------------------------------*/
+
+/** A robot motion defines a full motion for a robot.
+ **
+ */
+
+message RobotMotion {
+	// a motion consists of multiple motors performing individual motions
+	repeated MotorMotion motion  = 1;
+
+	// total duration (in ms) of motion
+	required uint64 durationTime = 2;
+
+	// defines if this is only pose or a real motion
+	required bool isPose         = 3 [default = false];
+
+	// creation timestamp of motion
+	optional string timestamp    = 4;
+
+	// optional notes from the user
+	optional string notes        = 5;
+
+	// specifies times when the gyro should be read, e.g. before dynamic parts
+	repeated uint32 gyroReadTime = 6; // @TODO: do we really need this??
+}
+
+
+/*------------------------------------------------------------------------------------------------*/
+
+/*
+** Extend Message to contain a robot motion
+*/
+
+extend Message {
+	optional RobotMotion robotMotion = 15;
+}

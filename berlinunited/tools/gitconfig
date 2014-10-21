@@ -1,0 +1,60 @@
+[core]
+    whitespace=fix,-indent-with-non-tab,trailing-space,cr-at-eol
+[user]
+    #name = Your Name
+    #email = email@adress.de
+[merge]
+    #tool = gvimdiff
+    #tool = threesome
+    # Always show a diffstat at the end of a merge:
+    stat = true
+[alias]
+    st = status
+    ci = commit
+    ca = commit -a
+    br = branch
+    co = checkout
+    df = diff --word-diff --color-words
+    dc = diff --word-diff --color-words --cached
+    #lol = log --graph --decorate --pretty=oneline --abbrev-commit
+    #lola = log --graph --decorate --pretty=oneline --abbrev-commit --all
+    l = log --pretty=format:\"%Cred%h%Creset %ad %Cred|%Creset %s%Cred%d %Cblue[%an]\" --graph --date=short
+    la = log --pretty=format:\"%Cred%h%Creset %ad %Cred|%Creset %s%Cred%d %Cblue[%an]\" --graph --date=short --all
+    hist = log --pretty=\"%n%Cblue--------------------------------------------------------------------------%n%Cred%h%Creset %ad %Cred|%Creset %s%Cred%d %Cblue[%an]\" --date=short --stat
+    mylog = log --pretty=format:\"%Cred%h %Creset  %ad  %s%Cred%d\" --date=relative --author=stefan --no-merges
+
+    ps = push -v
+    pl = pull -v
+    # start vim in diffmode for chaeges.
+    # every file gets opened seperately
+    d = difftool -y -t gvimdiff
+    unstage = reset HEAD --
+    # undo last commit
+    undo = reset --soft HEAD^
+    # show last commit
+    last = show -1 HEAD
+[color]
+    ui = true
+[color "diff"]
+    meta = yellow bold
+    frag = magenta bold
+    old = red bold
+    new = green bold
+[color "status"]
+    added = yellow
+    changed = green
+    untracked = cyan
+[diff]
+    # Allow git diff to do basic rename and copy detection:
+    renames = copies
+    # Tell git diff to use mnemonic prefixes (index, work tree, commit, object) instead of the standard a and b notation:
+    mnemonicprefix = true
+[branch]
+    # When branching off a remote branch, automatically let the local branch track the remote branch:
+    autosetupmerge = true
+[push]
+    # When pushing without giving a refspec, push the current branch to its upstream branch. See the git config man page for more possible options.
+	default = upstream
+[rerere]
+    # Enable the recording of resolved conflicts, so that identical hunks can be resolved automatically later on.
+    enabled = true

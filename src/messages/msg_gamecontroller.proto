@@ -1,0 +1,16 @@
+package de.fumanoids.message;
+
+import "msg_message.proto";
+
+message GCInfo {
+	optional bool     sendRequest             = 1;
+	optional uint32   robotGamecontrollerPort = 2;
+}
+
+/*
+** Extend Message to contain the info for the game controller
+*/
+
+extend Message {
+	optional GCInfo   gcInfo = 4;
+}

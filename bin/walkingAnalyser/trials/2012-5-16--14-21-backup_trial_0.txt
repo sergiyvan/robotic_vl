@@ -1,0 +1,1 @@
+# This file was automatically generated after 0 trials of a PGRL session in order to optimise the following params: ['stepsPerSecond', 'leglength', 'stepwidth', 'stepheight', 'footroll', 'torsoLeanFactor']

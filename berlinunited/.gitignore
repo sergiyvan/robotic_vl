@@ -1,0 +1,30 @@
+# object and build files
+*.pb.h
+*.pb.cc
+*_pb2.py
+*.pyc
+.*.swp
+obj
+build/sloccount.sc
+build/.last_executed
+build/pc
+build/*
+
+# documentation
+doc/xabsl
+doc/doxygen
+doc/modules*
+doc/doxyerrors.log
+
+# random stuff
+BerlinUnited.make
+/Makefile
+*~
+
+# post and pre build scrips
+bin/custom_postbuild_commands.sh
+bin/custom_prebuild_commands.sh
+
+# eclipse
+.metadata
+.settings

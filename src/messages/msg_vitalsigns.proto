@@ -1,0 +1,21 @@
+package de.fumanoids.message;
+
+import "msg_message.proto";
+
+message VitalSigns {
+	optional uint32          batteryPercent         = 1;
+	
+	optional float           walkerFramerate        = 2;
+	optional float           avgWalkerFramerate     = 3;
+	
+	optional float           visionFramerate        = 4;
+	optional float           avgVisionFramerate     = 5;
+}
+
+/*
+** Extend Message to contain information of the robot
+*/
+
+extend Message {
+	optional VitalSigns vitalSigns = 24;
+}

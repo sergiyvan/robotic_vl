@@ -1,0 +1,5 @@
+# This file was automatically generated after 10 trials of a PGRL session
+# in order to optimise the following params: ['stepsPerSecond', 'leglength', 'stepwidth', 'stepheight', 'footroll', 'torsoLeanFactor']
+p = pgrl.pgrl( ['stepsPerSecond', 'leglength', 'stepwidth', 'stepheight', 'footroll', 'torsoLeanFactor'] , [[30.0, 70.0], [200.0, 240.0], [27.0, 35.0], [20.0, 50.0], [5.0, 25.0], [0.5, 1.5]] )
+p.setZ_pi(0.148719)
+p.pgrl(10, 0, 440, 1, 0.691111, 0.300000, [0.62522192621771633, 1, 0.97960706121859953, 0.61314613603157242, 0.56830882435835672, 0.78453815160446227])

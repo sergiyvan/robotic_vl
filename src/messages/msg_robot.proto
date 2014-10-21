@@ -1,0 +1,22 @@
+package de.fumanoids.message;
+
+import "msg_body.proto";
+import "msg_link.proto";
+import "msg_sensor.proto";
+import "msg_message.proto";
+
+message Figure {
+	optional string name   	  = 1;
+	repeated Body   bodies 	  = 2;
+	repeated Link   links  	  = 3;
+	repeated Sensor sensors   = 4;
+	optional string timestamp = 5;
+}
+
+/*
+** Extend Message to contain a robot motion
+*/
+extend Message {
+        optional Figure robotDescription = 25;
+}
+

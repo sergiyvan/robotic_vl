@@ -1,0 +1,186 @@
+/* Protocol Buffer definition for images
+**
+** This protobuf message is used both for transmission (Robot -> PC) and storage (PBI - ProtoBuf
+** Image) of images captured by the robot. It contains metadata providing additional information
+** about the image and the environment at the time of capture.
+** 
+*/
+
+package de.fumanoids.message;
+
+import "msg_message.proto";
+import "msg_calibration.proto";
+import "msg_cameramatrix.proto";
+import "msg_cameratransitionmatrix.proto";
+import "msg_camerasettings.proto";
+
+
+/*------------------------------------------------------------------------------------------------*/
+
+/* image format 
+**
+*/
+
+enum ImageFormat {
+	YUV422_IMAGE = 1;
+	BAYER_IMAGE  = 2;
+	RGB_IMAGE    = 3;
+}
+
+
+
+/*------------------------------------------------------------------------------------------------*/
+
+/* image data
+** 
+*/ 
+
+message ImageData {
+	/* the format of the image */
+	required ImageFormat format        = 1;
+
+	/* the actual image data according to @format */
+	required bytes       data          = 2;
+
+	/* whether the image is compressed with zlib */
+	required bool        compressed    = 3 [ default = false ];
+
+	/* if image was compressed, what is the original byte size? */
+	optional int32       original_size = 10;
+	
+	/* width and height of the image in pixel */
+	required int32       width         = 4;
+	required int32       height        = 5;
+
+	/* original size of the image (if image was scaled down) */
+	optional int32       original_width  = 8;
+	optional int32       original_height = 9;
+
+	/* whether the image is the original data, i.e. as it was
+	   received from the camera, without modifications and
+	   without colorspace conversion! */
+	optional bool        original      = 6;
+
+	/* whether this image was enhanced post-capture, e.g. by
+	   applying smoothing or color enhancements */
+	optional bool        enhanced      = 7 [ default = false ];
+}
+
+
+/*------------------------------------------------------------------------------------------------*/
+
+/* The top-level image representation which contains meta-deta for the 
+** images as well as the image itself - or actually it may contain multiple
+** images as different versions could be included.
+*/ 
+
+message Image {
+	/* ID of the robot that captured this image */
+	optional int32     robotID   = 1;
+
+	/* time this image was captured */
+	optional int64     time      = 2;
+
+	/* type of image */
+	optional uint32    type         = 12 [ default = 0 ];
+
+	/* frame number of image */
+	optional int32     frameNo      = 13 [ default = -1 ];
+
+	/* frameset of image (some unique ID) */
+	optional int64     framesetUUID = 14;
+
+	/* the image(s) */
+	repeated ImageData imageData = 3;
+
+	message ImageCenter {
+		required int32 x = 1;
+		required int32 y = 2;
+		required int32 r = 3;
+	}
+
+	optional ImageCenter center_DEPRECATED  = 4; // [ deprecated=true ];
+
+	/* extrinsic parameters of the camera in degree (by default, i.e. 0°,
+	   the camera looks straight ahead (level to ground)) or centimeters
+	*/
+	optional int32       pitch     = 5;
+	optional int32       roll      = 6 [ default=-1 ];
+	optional int32       yaw       = 7 [ default=-1 ];
+	optional int32       eyeHeight = 8 [ default=-1 ];
+
+	/* intrinsic camera parameters */
+	optional CameraMatrix cameraMatrix = 21;
+
+	/* camera transition matrix */
+	optional CameraTransitionMatrix cameraTransitionMatrix = 22;
+
+	/* assumed horizon (y-value for image) */
+	optional int32       horizon   = 9 [ default=-1 ];
+
+	/* meta data on type of camera used and the settings */
+	optional string      camName   = 10;
+	optional CameraSettings camSettings = 11;
+}
+
+
+/*------------------------------------------------------------------------------------------------*/
+
+/* A request sent to an image capturing program (i.e. the robot software).
+** 
+*/ 
+
+message ImageRequest {
+	/* which kind of image to send */
+	required uint32      type       = 1  [ default=0     ];
+
+	/* how many images to stream (-1 == do not stop, 0 = stop now) */
+	optional int32       count      = 2  [ default=-1    ];
+
+	/* interval in ms between streaming one image and starting the next */
+	optional int32       interval   = 3  [ default=500   ];
+
+	/* image scaling */
+	optional float       scaling    = 4  [ default=1     ];
+
+	/* request compressed images (this is not mandatory for the robot to fulfill!) */
+	optional bool        compressed = 5  [ default=false ];
+
+	/* whether to include an RGB image */
+	optional bool        includeRGB = 6  [ default=false ];
+
+	/* whether to include the raw image */
+	optional bool        includeRAW = 7  [ default=true  ];
+}
+
+message ImageClick {
+	required int32 x  = 1;
+	required int32 y  = 2;
+
+	enum ImageClickType {
+		CLICK_ON_IMAGE     = 1;
+		CLICK_ON_FIELD     = 2;
+	}
+
+	optional ImageClickType type = 3;
+}
+
+message ImageTypeRequest {
+	required bool request = 1;
+}
+
+message ImageTypes {
+	repeated string types = 1;
+}
+
+
+/*------------------------------------------------------------------------------------------------*/
+
+
+extend Message {
+	optional ImageRequest     imageRequest     = 17;
+	optional Image            image            = 18;
+	optional ImageClick       imageClick       = 22;
+	optional ImageTypeRequest imageTypeRequest = 26;
+	optional ImageTypes       imageTypes       = 27;
+}

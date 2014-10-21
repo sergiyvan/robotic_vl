@@ -1,0 +1,67 @@
+###########################################################
+# astyle settings for the Coding Conventions of the
+# Berlin United teams at Freie Universität Berlin.
+###########################################################
+
+# Copy me to ~/.astylerc. For more details see
+# http://astyle.sourceforge.net/astyle.html
+
+# opening brackets ({) are attached to the line, i.e.
+#    if (value == true) {
+--style=java
+
+# --indent=tab / --indent=tab=# / -t / -t#
+# Indent using tab characters. Treat each tab as # spaces (e.g.
+# -t6 / --indent=tab=6). # must be between 2 and 20. If no # is set, treats
+# tabs as 4 spaces.
+indent=tab=4
+
+--min-conditional-indent=0
+
+#--pad-oper / -p 
+#Insert space padding around operators. Any end of line comments will remain in
+#the original column, if possible. Note that there is no option to unpad. Once
+#padded, they stay padded.
+#
+#if (foo==2)
+#    a=bar((b-c)*a,d--);
+#becomes:
+#
+#if (foo == 2)
+#     a = bar((b - c) * a, d--);
+-p
+
+
+#--pad-header / -H 
+#Insert space padding after paren headers only (e.g. 'if', 'for', 'while'...).
+#Any end of line comments will remain in the original column, if possible. This
+#can be used with unpad-paren to remove unwanted spaces.
+#
+#if(isFoo(a, b))
+#    bar(a, b);
+#becomes:
+#
+#if (isFoo(a, b))
+#    bar(a, b);
+pad-header
+
+# Converts tabs into spaces in the non-indentation part of the line.
+# The number of spaces inserted will maintain the spacing of the tab.
+# The current setting for spaces per tab is used.
+--convert-tabs
+
+#--add-brackets / -j 
+#Add brackets to unbracketed one line conditional statements (e.g. 'if', 'for',
+#'while'...). The statement must be on a single line. The brackets will be added
+#according to the currently requested predefined style or bracket type. If no
+#style or bracket type is requested the brackets will be attached. If
+#--add-one-line-brackets is also used the result will be one line brackets.
+#
+#if (isFoo)
+#    isFoo = false;
+#becomes:
+#
+#if (isFoo) {
+#    isFoo = false;
+#}
+add-brackets

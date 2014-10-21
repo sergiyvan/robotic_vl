@@ -1,0 +1,58 @@
+/* Protocol Buffer definition for map data
+**
+*/
+
+package de.fumanoids.message;
+
+import "msg_message.proto";
+import "msg_waypoints.proto";
+
+
+/*------------------------------------------------------------------------------------------------*/
+
+/** The Map message defines the environmental map the robot interacts on.
+ ** A number of pre-defined maps exist (the images are pre-stored in FUremote),
+ ** but for custom maps the map image data can be submitted.
+ */
+
+message Map {
+	enum MapType {
+		CUSTOM = 1;
+
+		ROBOCUP_SOCCER_HL_KID2013  = 2;
+		ROBOCUP_SOCCER_HL_TEEN2013 = 3;
+	}
+
+	required MapType  mapType   = 1;
+	required uint32   mapWidth  = 2;
+	required uint32   mapHeight = 3;
+	optional int32    xOffset   = 4 [ default = 0 ];
+	optional int32    yOffset   = 5 [ default = 0 ];
+	
+	enum MapCoordinateRotation {
+		X_AXIS_TO_RIGHT  = 1;
+		X_AXIS_TO_TOP    = 2;
+		X_AXIS_TO_LEFT   = 3;
+		X_AXIS_TO_BOTTOM = 4;
+	}
+	optional MapCoordinateRotation coordinateRotation = 6 [ default = X_AXIS_TO_RIGHT ];
+	
+	// the map data (optional and only for mapType == CUSTOM)
+	optional bytes mapImageData = 7;
+	
+	// way points from path planning
+	optional WayPoints waypoints = 8;
+}
+
+message MapRequest {
+	optional bool mapRequested   = 1;
+	optional WayPoints wayPointsToSet = 2;
+}
+
+
+/*------------------------------------------------------------------------------------------------*/
+
+extend Message {
+	optional Map        map        = 29;
+	optional MapRequest mapRequest = 30;
+}

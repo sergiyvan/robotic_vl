@@ -1,0 +1,29 @@
+package de.fumanoids.message;
+
+import "msg_position.proto";
+
+
+message Rectangle {
+	optional sint32 x = 1;
+	optional sint32 y = 2;
+	optional sint32 width = 3;
+	optional sint32 height = 4;
+}
+
+
+/**
+ * PerceptBaseClass, describing an object in an image.
+ * Intended to be extended with individual names for
+ * the various image percepts.
+ */
+
+message PerceptBaseClass {
+	optional bool valid = 1 [default = false];
+	optional Vec2i basePoint = 4;
+	optional Rectangle rectangle = 3;
+
+	optional Vec2d posRel = 2;
+	optional Vec2d posSphe = 5;
+}
+
+

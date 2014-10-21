@@ -1,0 +1,60 @@
+/* Position messages
+**
+** Representation of a position in various coordinates,
+** as well as other basic position classes.
+*/
+
+package de.fumanoids.message;
+
+message Position {
+	enum PositionType {
+		IMAGE     = 0;
+		RELATIVE  = 1;
+		POLAR     = 2;
+		ABSOLUTE  = 3;
+	}
+	required PositionType positionType = 1;
+	
+	optional int32 x      = 2 [ default = 0 ];
+	optional int32 y      = 3 [ default = 0 ];
+	optional int32 r      = 4 [ default = 0 ];
+
+	optional int32 thetaInDegree  = 5 [ default = 0 ];  // orientation angle in degree
+}
+
+
+/**
+ * A simple 2D vector.
+ *
+ * Can be used for basically everything.
+ */
+message Vec2i {
+	optional sint32 x = 1;
+	optional sint32 y = 2;
+}
+
+message Vec2d {
+	optional double x = 1;
+	optional double y = 2;
+}
+
+
+/**
+ * See Pose2D.h for more.
+ */
+message Pose2D {
+	optional Vec2d  translation   = 1;
+	optional double rotationInRad = 2;
+}
+
+
+/**
+ * A simple 3D vector.
+ *
+ * Can be used for basically everything.
+ */
+message Vec3 {
+	optional sint32 x = 1 [ default = 0 ];
+	optional sint32 y = 2 [ default = 0 ];
+	optional sint32 z = 3 [ default = 0 ];
+}

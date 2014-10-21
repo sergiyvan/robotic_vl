@@ -1,0 +1,22 @@
+/*
+ * cameraVCSBC6210.h
+ *
+ *  Created on: Mar 11, 2011
+ *      Author: dseifert
+ */
+
+#ifndef CAMERAVCSBC6210_H_
+#define CAMERAVCSBC6210_H_
+
+#include "camera_network.h"
+
+class CameraVCSBC6210: public CameraNetwork {
+public:
+	CameraVCSBC6210();
+	virtual ~CameraVCSBC6210();
+
+	virtual bool openCamera(const char* deviceName, uint16_t requestedImageWidth, uint16_t requestedImageHeight);
+	virtual void autoWhiteBalance(int16_t startX, int16_t endX, int16_t startY, int16_t endY);
+};
+
+#endif /* CAMERAVCSBC6210_H_ */
