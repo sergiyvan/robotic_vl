@@ -7,7 +7,7 @@
 		id: Motor ID or effector ID
 		name: role in kinematic tree
 		defaultMinMaxAngle: default/minimum/maximum angle of the motor
-		type: string describing the type of the motor eg. dummy, rotation (regular motor), parallelRotation (type we have in the knees), prismatic (we dont have that at all), omniwheel (see john) 
+		type: string describing the type of the motor eg. dummy, fixed, rotation (regular motor), parallelRotation (type we have in the knees) 
 	
 	All following parameters mean the translation from the parent node to the currently described node:
 		alphaX: rotation along x axis to align with idle pose of robot (degrees)
