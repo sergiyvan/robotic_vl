@@ -31,8 +31,10 @@ KinematicVisualBox::KinematicVisualBox(
 			Degree alphaX,
 			Degree alphaY,
 			Degree alphaZ,
+			KinematicVisual::ColorVec colors,
+			int textureNum,
 			bool isVisible)
-	: KinematicVisual(name, translationX, translationY, translationZ, alphaX, alphaY, alphaZ, isVisible)
+	: KinematicVisual(name, translationX, translationY, translationZ, alphaX, alphaY, alphaZ, colors, textureNum, isVisible)
 	, sizeX(sizeX)
 	, sizeY(sizeY)
 	, sizeZ(sizeZ)
@@ -116,6 +118,9 @@ void KinematicVisualBox::attatchToODE(arma::mat44 coordinateFrame, dBodyID body,
 
 	ODEUserObject *userObj = new ODEUserObject;
 	userObj->canCollide = true;
+	userObj->colorVec = m_colorVec;
+	userObj->textureNum = m_textureNum;
+	userObj->visible = visible;
 	dGeomSetData(boxGeom, userObj);
 
 	dGeomSetBody(boxGeom, body);
@@ -164,8 +169,10 @@ KinematicVisualCylinder::KinematicVisualCylinder(
 		Degree alphaX,
 		Degree alphaY,
 		Degree alphaZ,
+		KinematicVisual::ColorVec colors,
+		int textureNum,
 		bool isVisible)
-	: KinematicVisual(name, translationX, translationY, translationZ, alphaX, alphaY, alphaZ, isVisible)
+	: KinematicVisual(name, translationX, translationY, translationZ, alphaX, alphaY, alphaZ, colors, textureNum, isVisible)
 	, radius(radius)
 	, length(length)
 {
@@ -178,6 +185,9 @@ void KinematicVisualCylinder::attatchToODE(arma::mat44 coordinateFrame, dBodyID 
 
 	ODEUserObject *userObj = new ODEUserObject;
 	userObj->canCollide = true;
+	userObj->colorVec = m_colorVec;
+	userObj->textureNum = m_textureNum;
+	userObj->visible = visible;
 	dGeomSetData(cylingerGeom, userObj);
 
 	dGeomSetBody(cylingerGeom, body);

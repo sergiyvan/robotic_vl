@@ -17,6 +17,8 @@ PhysicsVisualization::~PhysicsVisualization() {
 
 #include <drawstuff/drawstuff.h>
 
+#include "ODEUserObject.h"
+
 #ifdef dDOUBLE
 #define dsDrawSphere dsDrawSphereD
 #define dsDrawBox dsDrawBoxD
@@ -53,37 +55,47 @@ static void drawGeom(dGeomID geomID)
     const dReal *rot = NULL;
     bool canDrawJoints = false;
 
+    ODEUserObject* userObj = (ODEUserObject*)dGeomGetData(geomID);
+    if (nullptr != userObj) {
+        dsSetColorAlpha(userObj->colorVec[0], userObj->colorVec[1], userObj->colorVec[2], userObj->colorVec[3]);
+//        printf("%f %f %f %f\n", userObj->colorVec[0], userObj->colorVec[1], userObj->colorVec[2], userObj->colorVec[3]);
+        dsSetTexture (userObj->textureNum);
+    } else {
+        dsSetColorAlpha(1, 1, 0, 1);
+        dsSetTexture (DS_WOOD);
+    }
+
     switch (gclass) {
         case dSphereClass:
-			pos = dGeomGetPosition(geomID);
-			rot = dGeomGetRotation(geomID);
-            dsSetColorAlpha(0, 0.75, 0.5, 1);
-            dsSetTexture (DS_CHECKERED);
-            dsDrawSphere(pos, rot, dGeomSphereGetRadius(geomID));
+        	if (nullptr != userObj && userObj->visible) {
+				pos = dGeomGetPosition(geomID);
+				rot = dGeomGetRotation(geomID);
+				dsDrawSphere(pos, rot, dGeomSphereGetRadius(geomID));
+        	}
             canDrawJoints = true;
             break;
         case dBoxClass:
         {
-			pos = dGeomGetPosition(geomID);
-			rot = dGeomGetRotation(geomID);
-            dVector3 lengths;
-            dsSetColorAlpha(1, 1, 0, 1);
-            dsSetTexture (DS_WOOD);
-            dGeomBoxGetLengths(geomID, lengths);
-            dsDrawBox(pos, rot, lengths);
+        	if (nullptr != userObj && userObj->visible) {
+				pos = dGeomGetPosition(geomID);
+				rot = dGeomGetRotation(geomID);
+				dVector3 lengths;
+				dGeomBoxGetLengths(geomID, lengths);
+				dsDrawBox(pos, rot, lengths);
+        	}
             canDrawJoints = true;
             break;
         }
         case dCylinderClass:
         {
-			pos = dGeomGetPosition(geomID);
-			rot = dGeomGetRotation(geomID);
-            dReal length;
-            dReal radius;
-            dsSetColorAlpha(1, 1, 0, 1);
-            dsSetTexture (DS_WOOD);
-            dGeomCylinderGetParams(geomID, &radius, &length);
-            dsDrawCylinder(pos, rot, length, radius);
+        	if (nullptr != userObj && userObj->visible) {
+				pos = dGeomGetPosition(geomID);
+				rot = dGeomGetRotation(geomID);
+				dReal length;
+				dReal radius;
+                dGeomCylinderGetParams(geomID, &radius, &length);
+                dsDrawCylinder(pos, rot, length, radius);
+        	}
             canDrawJoints = true;
             break;
         }

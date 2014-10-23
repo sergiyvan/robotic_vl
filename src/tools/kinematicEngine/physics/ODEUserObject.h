@@ -8,12 +8,18 @@
 #ifndef ODEUSEROBJECT_H_
 #define ODEUSEROBJECT_H_
 
+#include "tools/kinematicEngine/kinematicVisual.h"
+
 class ODEUserObject {
 public:
 	ODEUserObject();
 	virtual ~ODEUserObject();
 
 	bool canCollide;
+
+	KinematicVisual::ColorVec colorVec;
+	int textureNum;
+	bool visible;
 };
 
 #endif /* ODEUSEROBJECT_H_ */

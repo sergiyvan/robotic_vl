@@ -6,6 +6,7 @@
 #include <armadillo>
 #include <string>
 #include <vector>
+#include <array>
 
 #include <ode/ode.h>
 
@@ -56,6 +57,8 @@ KinematicFace operator* (arma::mat44 transitionMatrix, const KinematicFace& face
 
 class KinematicVisual {
 public:
+	typedef std::array<float, 4> ColorVec;
+
 	KinematicVisual(std::string name,
 			Millimeter translationX,
 			Millimeter translationY,
@@ -63,9 +66,13 @@ public:
 			Degree alphaX,
 			Degree alphaY,
 			Degree alphaZ,
+			ColorVec colors,
+			int textureNum,
 			bool visible=true)
-		: name(name)
+		: m_colorVec(colors)
+		, m_textureNum(textureNum)
 		, visible(visible)
+		, name(name)
 	{
 		arma::mat44 translation, rotationX, rotationY, rotationZ;
 
@@ -126,9 +133,12 @@ public:
 protected:
 	arma::mat44 transitionMatrix;
 
+	ColorVec m_colorVec;
+	int m_textureNum;
+	bool visible;
+
 private:
 	std::string name;
-	bool visible;
 
 	std::vector<KinematicFace> faces;
 };
@@ -149,6 +159,8 @@ public:
 			Degree alphaX,
 			Degree alphaY,
 			Degree alphaZ,
+			KinematicVisual::ColorVec colors,
+			int textureNum,
 			bool isVisible = true);
 
 	virtual void attatchToODE(arma::mat44 coordinateFrame, dBodyID body, dSpaceID space);
@@ -170,6 +182,8 @@ public:
 			Degree alphaX,
 			Degree alphaY,
 			Degree alphaZ,
+			KinematicVisual::ColorVec colors,
+			int textureNum,
 			bool isVisible = true);
 
 	virtual void attatchToODE(arma::mat44 coordinateFrame, dBodyID body, dSpaceID space);

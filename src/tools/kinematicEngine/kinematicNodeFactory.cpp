@@ -265,6 +265,33 @@ KinematicNode* KinematicNodeFactory::createNodeFromPTree(boost::property_tree::p
 		{
 			BOOST_FOREACH(boost::property_tree::ptree::value_type const &geometryChild, subChild.second.get_child("geometry"))
 			{
+
+				boost::optional<std::string> colorProp = geometryChild.second.get_optional<std::string>("<xmlattr>.color");
+				KinematicVisual::ColorVec colorVec({1, 1, 0, 1});
+				if (colorProp.is_initialized()) {
+					std::istringstream colStrS(colorProp.get());
+					INFO("PLOING %s", colorProp.get().c_str());
+					colStrS >> colorVec[0] >> colorVec[1] >> colorVec[2] >> colorVec[3];
+				}
+
+				boost::optional<std::string> textureProp = geometryChild.second.get_optional<std::string>("<xmlattr>.textureNo");
+				int textureNo = 1;
+				if (textureProp.is_initialized()) {
+					std::istringstream textureSS(textureProp.get());
+					textureSS >> textureNo;
+					textureNo = Math::limited(textureNo, 0, 4);
+				}
+
+				boost::optional<std::string> visibleProp = geometryChild.second.get_optional<std::string>("<xmlattr>.visible");
+				bool visible = true;
+				if (visibleProp.is_initialized()) {
+					std::string visibleStr = visibleProp.get();
+					std::transform(visibleStr.begin(), visibleStr.end(), visibleStr.begin(), ::tolower);
+					if ("true" != visibleStr) {
+						visible = false;
+					}
+				}
+
 				if ("box" == geometryChild.first) {
 					// <box center="0 60 60" dimensions="80 120 120" rpy="0 0 0" color="127 127 127"/>
 					std::string posString = geometryChild.second.get<std::string>("<xmlattr>.center");
@@ -294,7 +321,10 @@ KinematicNode* KinematicNodeFactory::createNodeFromPTree(boost::property_tree::p
 								dZ*millimeters,
 								rX*degrees,
 								rY*degrees,
-								rZ*degrees));
+								rZ*degrees,
+								colorVec,
+								textureNo,
+								visible));
 				} else if ("cylinder" == geometryChild.first) {
 					// <box center="0 60 60" dimensions="80 120 120" rpy="0 0 0" color="127 127 127"/>
 					std::string posString = geometryChild.second.get<std::string>("<xmlattr>.center");
@@ -329,7 +359,10 @@ KinematicNode* KinematicNodeFactory::createNodeFromPTree(boost::property_tree::p
 								length*millimeters,
 								rX*degrees,
 								rY*degrees,
-								rZ*degrees));
+								rZ*degrees,
+								colorVec,
+								textureNo,
+								visible));
 				}
 			}
 		}
