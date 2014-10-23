@@ -295,6 +295,41 @@ KinematicNode* KinematicNodeFactory::createNodeFromPTree(boost::property_tree::p
 								rX*degrees,
 								rY*degrees,
 								rZ*degrees));
+				} else if ("cylinder" == geometryChild.first) {
+					// <box center="0 60 60" dimensions="80 120 120" rpy="0 0 0" color="127 127 127"/>
+					std::string posString = geometryChild.second.get<std::string>("<xmlattr>.center");
+					double pX, pY, pZ;
+					std::istringstream posSS(posString);
+					posSS >> pX >> pY >> pZ;
+
+					std::string rotString = geometryChild.second.get<std::string>("<xmlattr>.rpy");
+					double rX, rY, rZ;
+					std::istringstream rotSS(rotString);
+					rotSS >> rX >> rY >> rZ;
+
+					std::string name = geometryChild.second.get<std::string>("<xmlattr>.name");
+
+					std::string lenString = geometryChild.second.get<std::string>("<xmlattr>.length");
+					double length;
+					std::istringstream dSS(lenString);
+					dSS >> length;
+
+					std::string radiusString = geometryChild.second.get<std::string>("<xmlattr>.radius");
+					double radius;
+					std::istringstream radSS(radiusString);
+					radSS >> radius;
+
+					kinematicNode->addVisual(
+						new KinematicVisualCylinder(
+								name,
+								pX*millimeters,
+								pY*millimeters,
+								pZ*millimeters,
+								radius*millimeters,
+								length*millimeters,
+								rX*degrees,
+								rY*degrees,
+								rZ*degrees));
 				}
 			}
 		}

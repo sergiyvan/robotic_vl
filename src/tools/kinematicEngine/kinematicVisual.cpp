@@ -152,3 +152,45 @@ KinematicFace operator* (arma::mat44 transitionMatrix, const KinematicFace& face
 
 	return newFace;
 }
+
+
+KinematicVisualCylinder::KinematicVisualCylinder(
+		std::string name,
+		Millimeter translationX,
+		Millimeter translationY,
+		Millimeter translationZ,
+		Millimeter radius,
+		Millimeter length,
+		Degree alphaX,
+		Degree alphaY,
+		Degree alphaZ,
+		bool isVisible)
+	: KinematicVisual(name, translationX, translationY, translationZ, alphaX, alphaY, alphaZ, isVisible)
+	, radius(radius)
+	, length(length)
+{
+}
+
+void KinematicVisualCylinder::attatchToODE(arma::mat44 coordinateFrame, dBodyID body, dSpaceID space)
+{
+	dGeomID cylingerGeom = dCreateCylinder(space, Meter(radius).value()
+									, Meter(length).value());
+
+	ODEUserObject *userObj = new ODEUserObject;
+	userObj->canCollide = true;
+	dGeomSetData(cylingerGeom, userObj);
+
+	dGeomSetBody(cylingerGeom, body);
+
+	arma::mat44 actualCoordinateFrame = coordinateFrame * transitionMatrix;
+
+	dMatrix3 rotMat;
+	dVector3 offsetVector;
+	odeUtils::getRotationMatrixAsDMat(actualCoordinateFrame, rotMat);
+	odeUtils::getPositionAsDVec(actualCoordinateFrame, offsetVector);
+
+	dGeomSetOffsetPosition(cylingerGeom, offsetVector[0]
+									, offsetVector[1]
+									, offsetVector[2]);
+	dGeomSetOffsetRotation(cylingerGeom, rotMat);
+}

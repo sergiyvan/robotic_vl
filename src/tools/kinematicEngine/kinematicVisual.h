@@ -157,4 +157,25 @@ private:
 	Millimeter sizeX, sizeY, sizeZ;
 };
 
+
+class KinematicVisualCylinder : public KinematicVisual {
+public:
+	KinematicVisualCylinder(
+			std::string name,
+			Millimeter translationX,
+			Millimeter translationY,
+			Millimeter translationZ,
+			Millimeter radius,
+			Millimeter length,
+			Degree alphaX,
+			Degree alphaY,
+			Degree alphaZ,
+			bool isVisible = true);
+
+	virtual void attatchToODE(arma::mat44 coordinateFrame, dBodyID body, dSpaceID space);
+
+private:
+	Millimeter radius, length;
+};
+
 #endif

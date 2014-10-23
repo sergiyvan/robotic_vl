@@ -21,6 +21,7 @@ PhysicsVisualization::~PhysicsVisualization() {
 #define dsDrawSphere dsDrawSphereD
 #define dsDrawBox dsDrawBoxD
 #define dsDrawLine dsDrawLineD
+#define dsDrawCylinder dsDrawCylinderD
 #endif
 
 #define DRAW_JOINTS_TOO
@@ -73,10 +74,24 @@ static void drawGeom(dGeomID geomID)
             canDrawJoints = true;
             break;
         }
+        case dCylinderClass:
+        {
+			pos = dGeomGetPosition(geomID);
+			rot = dGeomGetRotation(geomID);
+            dReal length;
+            dReal radius;
+            dsSetColorAlpha(1, 1, 0, 1);
+            dsSetTexture (DS_WOOD);
+            dGeomCylinderGetParams(geomID, &radius, &length);
+            dsDrawCylinder(pos, rot, length, radius);
+            canDrawJoints = true;
+            break;
+        }
 
         default:
         	break;
     }
+//	printf("class: %d\n", gclass);
 
     if (canDrawJoints) {
 #ifdef DRAW_JOINTS_TOO
