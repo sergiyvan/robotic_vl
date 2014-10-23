@@ -11,6 +11,9 @@
 #include "representations/motion/kinematicTree.h"
 #include "ODEMotor.h"
 
+#include "services.h"
+#include "platform/hardware/robot/robotModel.h"
+
 
 static void nearCallback_wrapper (void *data, dGeomID o1, dGeomID o2);
 
@@ -104,6 +107,52 @@ public:
 			}
 		}
 	}
+
+	void offsetAllBodies(KinematicTree *tree) {
+		std::vector<dBodyID> allBodies;
+		getAllBodies(tree->getRootNode(), allBodies);
+
+		dReal aabb[6];
+		for (int i = 0; i < 6; ++i) {
+			aabb[i] = 0;
+		}
+
+		for (dBodyID body : allBodies) {
+			dGeomID geom = dBodyGetFirstGeom(body);
+			while (geom != nullptr)
+			{
+				dReal curAABB[6];
+				dGeomGetAABB(geom, curAABB);
+
+				for (uint i = 0; i < 6; i += 2) {
+					aabb[i + 0] = std::min(aabb[i + 0], curAABB[i + 0]);
+					aabb[i + 1] = std::max(aabb[i + 1], curAABB[i + 1]);
+				}
+
+				geom = dBodyGetNextGeom(geom);
+			}
+		}
+
+		dReal XOff = 0;
+		dReal YOff = 0;
+		dReal ZOff = -aabb[4];
+
+		for (dBodyID body : allBodies) {
+		    const dReal *pos = dBodyGetPosition(body);
+		    dBodySetPosition(body, pos[0] + XOff, pos[1] + YOff, pos[2] + ZOff);
+		}
+
+	}
+	void getAllBodies(KinematicNode const* node, std::vector<dBodyID> &o_bodies) {
+		dBodyID nodesBody = node->getODEBody();
+		if (std::find(o_bodies.begin(), o_bodies.end(), nodesBody) == o_bodies.end()) {
+			o_bodies.push_back(nodesBody);
+		}
+
+		for (KinematicNode const* child : node->getChildren()) {
+			getAllBodies(child, o_bodies);
+		}
+	}
 };
 
 
@@ -128,12 +177,11 @@ PhysicsEnvironment::~PhysicsEnvironment() {
 
 
 void PhysicsEnvironment::setKinematicModel(KinematicTree *tree)
-{
-	// get all the stuff from the tree and put it into the physics environment
+{	// get all the stuff from the tree and put it into the physics environment
 
 	arma::mat44 coordinateFrame = arma::eye(4, 4);
 	std::map<MotorID, arma::colvec3> effectorPositions;
-	KinematicNode *rootNode = tree->getNode(EFFECTOR_ID_ROOT);
+	KinematicNode *rootNode = const_cast<KinematicNode*>(tree->getRootNode());
 	tree->calculateEffectorsPositions(effectorPositions, rootNode, coordinateFrame);
 
 	double minX =  std::numeric_limits<double>::infinity();
@@ -154,10 +202,12 @@ void PhysicsEnvironment::setKinematicModel(KinematicTree *tree)
 		maxZ = std::max(maxZ, pos.second(2));
 	}
 
+
 	arma::mat44 rootFrame = arma::eye(4, 4);
 	rootFrame.col(3).rows(0, 2) = arma::colvec({0, 0, -minZ + .0});
-
 	m_privData->setKinematicModel(this, tree, rootFrame, rootNode);
+
+	m_privData->offsetAllBodies(tree);
 }
 
 

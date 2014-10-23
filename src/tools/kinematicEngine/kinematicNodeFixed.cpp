@@ -37,11 +37,9 @@ dBodyID KinematicNodeFixed::attachToODE(PhysicsEnvironment *environment, dSpaceI
 {
 	KinematicNodeDummy::attachToODE(environment, visualSpaceID, collisionSpaceID, coordinateFrame);
 
-	// add a joint which fixes this node with the environment
-	dWorldID worldID = environment->getWorldID();
-	m_fixedJoint = dJointCreateFixed(worldID, 0);
-	dJointAttach(m_fixedJoint, 0, m_odeBody);
+	dBodyID body = getODEBody();
+	dBodySetKinematic(body);
 
-	return m_odeBody;
+	return body;
 }
 
