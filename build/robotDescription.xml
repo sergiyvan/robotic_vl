@@ -26,11 +26,23 @@
 		maxForce: the maximum force (in Nm od N) the effector can generate (assumed 0 when not specified)
 		maxSpeed: the maximum speed the motor can generate (RPM or m/min)
 	
-	Body attributes:
+	Body attributes (bodies are just masses):
 		mass: mass in grams of this body part
 		positionX: position (X in mm) of the equivalent mass in the limbs coordinate frame
 		positionY: position (Y in mm) of the equivalent mass in the limbs coordinate frame
 		positionZ: position (Z in mm) of the equivalent mass in the limbs coordinate frame
+		
+	Visuals:
+		supported types: box, cylinder
+		center: center position of the visual
+		rpy:    roll pitch yaw (see alphaX/Y/Z)
+		name:   a name
+		color:  color to use when drawing
+		textureNo: index of the texture to use (0-5)
+		visible: "true" or "false" if this visual should be drawn or not
+		dimension (box only): size of the box
+		radius (cylinder only): radius of the cylinder
+		length (cylinder only): lenght of the cylinder
 	-->
 
 	<effector name="root" type="dummy">
