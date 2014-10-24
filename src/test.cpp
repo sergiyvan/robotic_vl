@@ -54,7 +54,6 @@ public:
 
 	virtual void execute() {
 		// ------ INSERT YOUR code here BUT DO NOT COMMIT THIS FILE!
-		INFO("Poke");
 	}
 };
 
