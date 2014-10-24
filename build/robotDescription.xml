@@ -37,7 +37,7 @@
 		center: center position of the visual
 		rpy:    roll pitch yaw (see alphaX/Y/Z)
 		name:   a name
-		color:  color to use when drawing
+		color:  color to use when drawing (R G B alpha)
 		textureNo: index of the texture to use (0-5)
 		visible: "true" or "false" if this visual should be drawn or not
 		dimension (box only): size of the box
@@ -47,9 +47,11 @@
 
 	<effector name="root" type="dummy">
 		<effector name="gyroscope" type="dummy">
+		</effector>
+			
 			<visual>
 				<geometry>
-					<box center="9 0 83" dimensions="80 120 120" color="127 127 127" rpy="0 0 0" name="Torso"/>
+					<box center="9 0 83" dimensions="80 120 120" color="1 1 0 1" rpy="0 0 0" name="Torso" textureNo="0" />
 				</geometry>
 			</visual>
 			<body mass="162" name="case" position="0 0 83"/>
@@ -63,8 +65,8 @@
 
 				<visual>
 					<geometry>
-						<box center="0 59 2.4" dimensions="35 2 20" color="127 127 127" rpy="0 0 0" name="Shoulder Holder (left)" />
-						<box center="0 -59 2.4" dimensions="35 2 20" color="127 127 127" rpy="0 0 0" name="Shoulder Holder (right)" />
+						<box center="0 59 2.4" dimensions="35 2 20" color="1 1 0 1" rpy="0 0 0" name="Shoulder Holder (left)" />
+						<box center="0 -59 2.4" dimensions="35 2 20" color="1 1 0 1" rpy="0 0 0" name="Shoulder Holder (right)" />
 					</geometry>
 				</visual>
 				
@@ -75,11 +77,11 @@
 					<visual>
 						<geometry>
 							<!-- x down, y back, z left -->
-							<box center="13 0 0" dimensions="50 40 36" color="0 0 0" rpy="0 0 0" name="Pitch Motor (left)" />
+							<box center="13 0 0" dimensions="50 40 36" color="1 1 0 1" rpy="0 0 0" name="Pitch Motor (left)" />
 						</geometry>
 					</visual>
 
-					<effector id="5" name="LeftArmRoll" type="rotation" position="0 0 0" rpy="-90 0 -20" defaultMinMaxAngle="-10 -120 -10" maxForce="3.7" maxSpeed="80">
+					<effector id="5" name="LeftArmRoll" type="rotation" position="0 0 0" rpy="-90 0 -0" defaultMinMaxAngle="-10 -120 -10" maxForce="3.7" maxSpeed="80">
 						<body mass="111" name="leftArmRollMotor" position="8 0 40"/>
 						<body mass="14" name="armConnectorFront" position="55 0 -20"/>
 						<body mass="13" name="armConnectorBack" position="55 0 20"/>
@@ -87,13 +89,20 @@
 						
 						<visual>
 							<geometry>
-								<box center="13 0 40" dimensions="50 40 36" color="0 0 0" rpy="0 0 0" name="Pitch Motor (left)" />
+								<box center="13 0 40" dimensions="50 40 36" color="1 1 0 1" rpy="0 0 0" name="Pitch Motor (left)" />
 							</geometry>
 						</visual>
 						
 						<effector id="7" name="LeftElbow" type="rotation" position="145 0 0" rpy="90 0 0" defaultMinMaxAngle="0 -150 150" maxForce="3.7" maxSpeed="80">
 							<body mass="30" name="leftHand" position="68 0 22"/>
 							<effector name="LeftHand" type="dummy" position="128 0 22" rpy="0 0 0">
+								
+								<visual>
+									<geometry>
+										<box center="0 0 0" dimensions="10 10 10" color="1 1 0 1" rpy="0 0 0" name="leftHand" />
+									</geometry>
+								</visual>
+
 							</effector>
 						</effector>
 					</effector>
@@ -105,11 +114,11 @@
 
 					<visual>
 						<geometry>
-							<box center="13 0 0" dimensions="50 40 36" color="0 0 0" rpy="0 0 0" name="Pitch Motor (right)" />
+							<box center="13 0 0" dimensions="50 40 36" color="1 1 0 1" rpy="0 0 0" name="Pitch Motor (right)" />
 						</geometry>
 					</visual>
 
-					<effector id="6" name="RightArmRoll" type="rotation" position="0 0 0" rpy="90 0 20" defaultMinMaxAngle="10 10 120" maxForce="3.7" maxSpeed="80">
+					<effector id="6" name="RightArmRoll" type="rotation" position="0 0 0" rpy="90 0 0" defaultMinMaxAngle="10 10 120" maxForce="3.7" maxSpeed="80">
 						<body mass="111" name="rightArmRollMotor" position="8 0 40"/>
 						<body mass="14" name="armConnectorFront" position="55 0 -20"/>
 						<body mass="13" name="armConnectorBack" position="55 0 20"/>
@@ -117,13 +126,20 @@
 						
 						<visual>
 							<geometry>
-								<box center="13 0 40" dimensions="50 40 36" color="0 0 0" rpy="0 0 0" name="Pitch Motor (left)" />
+								<box center="13 0 40" dimensions="50 40 36" color="1 1 0 1" rpy="0 0 0" name="Pitch Motor (left)" />
 							</geometry>
 						</visual>
 						
 						<effector id="8" name="RightElbow" type="rotation" rpy="-90 0 0" position="145 0 0" defaultMinMaxAngle="0 -150 150" maxForce="3.7" maxSpeed="80">
 							<body mass="30" name="rightHand" position="68 0 22"/>
 							<effector name="RightHand" type="dummy" rpy="0 0 0" position="128 0 22">
+								
+								<visual>
+									<geometry>
+										<box center="0 0 0" dimensions="10 10 10" color="1 1 0 1" rpy="0 0 0" name="rightHand" />
+									</geometry>
+								</visual>
+
 							</effector>
 						</effector>
 					</effector>
@@ -143,12 +159,12 @@
 				</effector>
 			</effector>
 			
-			<effector id="10" name="Spine" type="rotation" position="0 0 0" rpy="0 90 0" defaultMinMaxAngle="0 -10 10" maxForce="6.2" maxSpeed="60">
+			<effector id="10" name="Spine" type="rotation" position="0 0 0" rpy="0 90 0" defaultMinMaxAngle="0 -10 10" maxForce="3.5" maxSpeed="60">
 				<body mass="165" name="stomachMotor" position="18 0 0"/>
 				<body mass="9" name="connectorPart1" position="0 0 20"/>
 				<body mass="9" name="connectorPart2" position="0 0 -20"/>
 				
-				<effector id="9" name="Stomach" type="rotation" position="31.5 0 0" rpy="90 0 0" defaultMinMaxAngle="0 -90 90" maxForce="6.2" maxSpeed="60">
+				<effector id="9" name="Stomach" type="rotation" position="31.5 0 0" rpy="90 0 0" defaultMinMaxAngle="0 -90 90" maxForce="3.5" maxSpeed="60">
 					<body mass="10" name="funnyPartsConnector" position="24 0 0"/>
 					<body mass="20" name="funnyPartR" position="0 0 22"/>
 					<body mass="14" name="funnyPartRFront" position="-15 25 45"/>
@@ -158,12 +174,12 @@
 					<body mass="14" name="funnyPartLBack" position="-15 -25 -45"/>
 				
 					<!-- left leg -->
-					<effector id="11" name="LeftHipRoll" type="rotation" position="-16 0 -67" rpy="90 0 0" defaultMinMaxAngle="0 -100 10" maxForce="6.2" maxSpeed="60">
+					<effector id="11" name="LeftHipRoll" type="rotation" position="-16 0 -67" rpy="90 0 0" defaultMinMaxAngle="0 -100 5" maxForce="3.5" maxSpeed="60">
 						<body mass="165" name="leftHipRollMotor" position="15 0 0"/>
 						<body mass="9" name="connectorPart1" position="28 0 20"/>
 						<body mass="9" name="connectorPart2" position="28 0 -20"/>
 						
-						<effector id="13" name="LeftKneeTop" type="parallelRotation" position="19 0 0" rpy="90 0 0" defaultMinMaxAngle="-1 -90 0" limbLength="100" maxForce="6.2" maxSpeed="60">
+						<effector id="13" name="LeftKneeTop" type="parallelRotation" position="19 0 0" rpy="90 0 0" defaultMinMaxAngle="-1 -89 0" limbLength="100" maxForce="3.5" maxSpeed="60">
 							<body mass="165" name="leftKneeTopMotor" position="0 0 0"/>
 							<body mass="165" name="leftKneeBottomMotor" position="40 0 0"/>
 							<body mass="12" name="bigLegConnectorPartLFront" position="-50 -13 30"/>
@@ -175,11 +191,11 @@
 
 							<visual>
 								<geometry>
-									<box center="0 -20 0" dimensions="40 61 56" color="0 0 0" rpy="0 0 0" name="Knee Top Motor (left)" />
+									<box center="0 -20 0" dimensions="40 61 56" color="1 1 0 1" rpy="0 0 0" name="Knee Top Motor (left)" />
 								</geometry>
 							</visual>
 
-							<effector id="15" name="LeftKneeBottom" type="parallelRotation" position="40.2 0 0" rpy="0 0 0" defaultMinMaxAngle="1 0 90" limbLength="100" maxForce="6.2" maxSpeed="60">
+							<effector id="15" name="LeftKneeBottom" type="parallelRotation" position="40.2 0 0" rpy="0 0 0" defaultMinMaxAngle="1 0 89" limbLength="100" maxForce="3.5" maxSpeed="60">
 								<body mass="12" name="bigLegConnectorPartLFront" position="-50 -13 30"/>
 								<body mass="12" name="bigLegConnectorPartRFront" position="-50 -13 -30"/>
 								<body mass="9" name="bigLegConnectorPartLBack" position="-50 13 30"/>
@@ -188,7 +204,7 @@
 								<body mass="9" name="connectorPart2" position="-16 0 -20"/>
 								<body mass="165" name="leftFootRollMotor" position="-16 0 0"/>
 						
-								<effector id="17" name="LeftFootRoll" type="rotation"  position="-3 0 0" rpy="90 0 0" defaultMinMaxAngle="0 -20 20" maxForce="6.2" maxSpeed="60">
+								<effector id="17" name="LeftFootRoll" type="rotation"  position="-3 0 0" rpy="90 0 0" defaultMinMaxAngle="0 -20 20" maxForce="3.5" maxSpeed="60">
 									<body mass="7" name="connectorPartFront" position="17 0 15"/>
 									<body mass="7" name="connectorPartBack" position="17 0 -15"/>
 
@@ -196,6 +212,7 @@
 										<body mass="111" name="leftFootYawMotor" position="0 0 0"/>
 										<body mass="100" name="foot" position="0 0 0"/>
 										
+										<effector name="LeftFoot" type="dummy" position="0 0 0" rpy="180 0 0" />
 										<effector name="footLeftBackCenter" type="dummy" position="-62 0 0" rpy="180 0 0" />
 										<effector name="footLeftFrontCenter" type="dummy" position="74 0 0" rpy="180 0 0" />
 										
@@ -206,9 +223,9 @@
 
 										<visual>
 											<geometry>
-												<box center="6 0 -1" dimensions="136 76 2" color="127 127 127" rpy="0 0 0" name="FootPlate (left)" />
-												<box center="71.5 0 -13.5" dimensions="5 76 25" color="0 0 0" rpy="0 0 0" name="FrontPlate (left)" />
-												<box center="6 35.5 -15" dimensions="136 5 28" color="0 0 0" rpy="0 0 0" name="InnerSide (left)" />
+												<box center="6 0 -1" dimensions="136 76 2" color="1 1 0 1" rpy="0 0 0" name="FootPlate (left)" />
+												<box center="71.5 0 -13.5" dimensions="5 76 25" color="1 1 0 1" rpy="0 0 0" name="FrontPlate (left)" />
+												<box center="6 35.5 -15" dimensions="136 5 28" color="1 1 0 1" rpy="0 0 0" name="InnerSide (left)" />
 											</geometry>
 										</visual>
 									</effector>
@@ -218,15 +235,15 @@
 					</effector>
 					
 					<!-- right leg -->
-					<effector id="12" name="RightHipRoll" type="rotation" position="-16 0 67" rpy="90 0 0" defaultMinMaxAngle="0 -10 100" maxForce="6.2" maxSpeed="60">
+					<effector id="12" name="RightHipRoll" type="rotation" position="-16 0 67" rpy="90 0 0" defaultMinMaxAngle="0 -5 100" maxForce="3.5" maxSpeed="60">
 						<body mass="165" name="rightHipRollMotor" position="15 0 0"/>
 						<body mass="9" name="connectorPart1" position="28 0 20"/>
 						<body mass="9" name="connectorPart2" position="28 0 -20"/>
 						
-						<effector id="14" name="RightKneeTop" type="parallelRotation" position="19 0 0" rpy="-90 0 0" defaultMinMaxAngle="1 0 90" limbLength="100" maxForce="6.2" maxSpeed="60">
+						<effector id="14" name="RightKneeTop" type="parallelRotation" position="19 0 0" rpy="-90 0 0" defaultMinMaxAngle="1 0 89" limbLength="100" maxForce="3.5" maxSpeed="60">
 							<visual>
 								<geometry>
-									<box center="0 20 0" dimensions="40 61 56" color="0 0 0" rpy="0 0 0" name="Knee Top Motor (right)" />
+									<box center="0 20 0" dimensions="40 61 56" color="1 1 0 1" rpy="0 0 0" name="Knee Top Motor (right)" />
 								</geometry>
 							</visual>
 
@@ -239,7 +256,7 @@
 							<body mass="11" name="motorsConnectorL" position="20 0 25"/>
 							<body mass="11" name="motorsConnectorR" position="20 0 -25"/>
 							
-							<effector id="16" name="RightKneeBottom" type="parallelRotation" position="40.2 0 0" rpy="0 0 0" defaultMinMaxAngle="-1 -90 0" limbLength="100" maxForce="6.2" maxSpeed="60">
+							<effector id="16" name="RightKneeBottom" type="parallelRotation" position="40.2 0 0" rpy="0 0 0" defaultMinMaxAngle="-1 -89 0" limbLength="100" maxForce="3.5" maxSpeed="60">
 								<body mass="12" name="bigLegConnectorPartLFront" position="-50 13 -30"/>
 								<body mass="12" name="bigLegConnectorPartRFront" position="-50 13 30"/>
 								<body mass="9" name="bigLegConnectorPartLBack" position="-50 -13 -30"/>
@@ -248,7 +265,7 @@
 								<body mass="9" name="connectorPart2" position="-16 0 20"/>
 								<body mass="165" name="rightFootRollMotor" position="-16 0 0"/>
 								
-								<effector id="18" name="RightFootRoll" type="rotation" position="-3 0 0" rpy="-90 0 0" defaultMinMaxAngle="0 -20 20" maxForce="6.2" maxSpeed="60">
+								<effector id="18" name="RightFootRoll" type="rotation" position="-3 0 0" rpy="-90 0 0" defaultMinMaxAngle="0 -20 20" maxForce="3.5" maxSpeed="60">
 									<body mass="7" name="connectorPartFront" position="17 0 15"/>
 									<body mass="7" name="connectorPartBack" position="17 0 -15"/>
 									
@@ -256,6 +273,7 @@
 										<body mass="111" name="rightFootYawMotor" position="0 0 0"/>
 										<body mass="100" name="foot" position="0 0 0"/>
 										
+										<effector name="RightFoot" type="dummy" position="0 0 0" rpy="180 0 0" />
 										<effector name="footRightBackCenter" type="dummy" position="-62 0 0" rpy="180 0 0" />
 										<effector name="footRightFrontCenter" type="dummy" position="74 0 0" rpy="180 0 0" />
 										
@@ -266,9 +284,9 @@
 
 										<visual>
 											<geometry>
-												<box center="6 0 -1" dimensions="136 76 2" color="127 127 127" rpy="0 0 0" name="FootPlate (right)" />
-												<box center="71.5 0 -13.5" dimensions="5 76 25" color="0 0 0" rpy="0 0 0" name="FrontPlate (right)" />
-												<box center="6 -35.5 -15" dimensions="136 5 28" color="0 0 0" rpy="0 0 0" name="InnerSide (right)" />
+												<box center="6 0 -1" dimensions="136 76 2" color="1 1 0 1" rpy="0 0 0" name="FootPlate (right)" />
+												<box center="71.5 0 -13.5" dimensions="5 76 25" color="1 1 0 1" rpy="0 0 0" name="FrontPlate (right)" />
+												<box center="6 -35.5 -15" dimensions="136 5 28" color="1 1 0 1" rpy="0 0 0" name="InnerSide (right)" />
 											</geometry>
 										</visual>
 									</effector>
@@ -278,8 +296,6 @@
 					</effector>
 				</effector>
 			</effector>
-					
-		</effector>
 					
 	</effector>
 </robotdescription>
