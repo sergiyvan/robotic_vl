@@ -204,3 +204,47 @@ void KinematicVisualCylinder::attatchToODE(arma::mat44 coordinateFrame, dBodyID 
 									, offsetVector[2]);
 	dGeomSetOffsetRotation(cylingerGeom, rotMat);
 }
+
+
+KinematicVisualSphere::KinematicVisualSphere(
+		std::string name,
+		Millimeter translationX,
+		Millimeter translationY,
+		Millimeter translationZ,
+		Millimeter radius,
+		Degree alphaX,
+		Degree alphaY,
+		Degree alphaZ,
+		KinematicVisual::ColorVec colors,
+		int textureNum,
+		bool isVisible)
+	: KinematicVisual(name, translationX, translationY, translationZ, alphaX, alphaY, alphaZ, colors, textureNum, isVisible)
+	, radius(radius)
+{
+}
+
+void KinematicVisualSphere::attatchToODE(arma::mat44 coordinateFrame, dBodyID body, dSpaceID space)
+{
+	dGeomID sphereGeom = dCreateSphere(space, Meter(radius).value());
+
+	ODEUserObject *userObj = new ODEUserObject;
+	userObj->canCollide = true;
+	userObj->colorVec = m_colorVec;
+	userObj->textureNum = m_textureNum;
+	userObj->visible = visible;
+
+	dGeomSetData(sphereGeom, userObj);
+	dGeomSetBody(sphereGeom, body);
+
+	arma::mat44 actualCoordinateFrame = coordinateFrame * transitionMatrix;
+
+	dMatrix3 rotMat;
+	dVector3 offsetVector;
+	odeUtils::getRotationMatrixAsDMat(actualCoordinateFrame, rotMat);
+	odeUtils::getPositionAsDVec(actualCoordinateFrame, offsetVector);
+
+	dGeomSetOffsetPosition(sphereGeom, offsetVector[0]
+									, offsetVector[1]
+									, offsetVector[2]);
+	dGeomSetOffsetRotation(sphereGeom, rotMat);
+}

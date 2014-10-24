@@ -192,4 +192,27 @@ private:
 	Millimeter radius, length;
 };
 
+
+
+class KinematicVisualSphere : public KinematicVisual {
+public:
+	KinematicVisualSphere(
+			std::string name,
+			Millimeter translationX,
+			Millimeter translationY,
+			Millimeter translationZ,
+			Millimeter radius,
+			Degree alphaX,
+			Degree alphaY,
+			Degree alphaZ,
+			KinematicVisual::ColorVec colors,
+			int textureNum,
+			bool isVisible = true);
+
+	virtual void attatchToODE(arma::mat44 coordinateFrame, dBodyID body, dSpaceID space);
+
+private:
+	Millimeter radius, length;
+};
+
 #endif

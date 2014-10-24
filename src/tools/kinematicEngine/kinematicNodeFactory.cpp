@@ -255,22 +255,49 @@ KinematicNode* KinematicNodeFactory::createNodeFromPTree(boost::property_tree::p
 			double mass = subChild.second.get<double>("<xmlattr>.mass");
 			double pX, pY, pZ;
 			std::string posString = subChild.second.get<std::string>("<xmlattr>.position");
-			std::string nameStr = subChild.second.get<std::string>("<xmlattr>.name");
+			std::string name = "";
+			boost::optional<std::string> nameStr = subChild.second.get_optional<std::string>("<xmlattr>.name");
+			if (nameStr.is_initialized()) {
+				name = nameStr.get();
+			}
 			std::istringstream i(posString);
 			i >> pX >> pY >> pZ;
 			arma::colvec3 positionMM = arma::colvec({pX, pY, pZ}) * 0.001;
-			kinematicNode->addMass(mass, positionMM, nameStr);
+			kinematicNode->addMass(mass, positionMM, name);
 		}
 		if ("visual" == subChild.first)
 		{
 			BOOST_FOREACH(boost::property_tree::ptree::value_type const &geometryChild, subChild.second.get_child("geometry"))
 			{
 
+				double pX = 0;
+				double pY = 0;
+				double pZ = 0;
+				boost::optional<std::string> posString = geometryChild.second.get_optional<std::string>("<xmlattr>.center");
+				if (posString.is_initialized()) {
+					std::istringstream posSS(posString.get());
+					posSS >> pX >> pY >> pZ;
+				}
+
+				double rX = 0;
+				double rY = 0;
+				double rZ = 0;
+				boost::optional<std::string> rotString = geometryChild.second.get_optional<std::string>("<xmlattr>.rpy");
+				if (rotString.is_initialized()) {
+					std::istringstream rotSS(rotString.get());
+					rotSS >> rX >> rY >> rZ;
+				}
+
+				std::string name = "";
+				boost::optional<std::string> nameStr = geometryChild.second.get_optional<std::string>("<xmlattr>.name");
+				if (nameStr.is_initialized()) {
+					name = nameStr.get();
+				}
+
 				boost::optional<std::string> colorProp = geometryChild.second.get_optional<std::string>("<xmlattr>.color");
 				KinematicVisual::ColorVec colorVec({1, 1, 0, 1});
 				if (colorProp.is_initialized()) {
 					std::istringstream colStrS(colorProp.get());
-					INFO("PLOING %s", colorProp.get().c_str());
 					colStrS >> colorVec[0] >> colorVec[1] >> colorVec[2] >> colorVec[3];
 				}
 
@@ -293,22 +320,11 @@ KinematicNode* KinematicNodeFactory::createNodeFromPTree(boost::property_tree::p
 				}
 
 				if ("box" == geometryChild.first) {
-					// <box center="0 60 60" dimensions="80 120 120" rpy="0 0 0" color="127 127 127"/>
-					std::string posString = geometryChild.second.get<std::string>("<xmlattr>.center");
-					double pX, pY, pZ;
-					std::istringstream p(posString);
-					p >> pX >> pY >> pZ;
 
 					std::string dimString = geometryChild.second.get<std::string>("<xmlattr>.dimensions");
 					double dX, dY, dZ;
 					std::istringstream d(dimString);
 					d >> dX >> dY >> dZ;
-
-					std::string rotString = geometryChild.second.get<std::string>("<xmlattr>.rpy");
-					double rX, rY, rZ;
-					std::istringstream r(rotString);
-					r >> rX >> rY >> rZ;
-					std::string name = geometryChild.second.get<std::string>("<xmlattr>.name");
 
 					kinematicNode->addVisual(
 						new KinematicVisualBox(
@@ -326,18 +342,6 @@ KinematicNode* KinematicNodeFactory::createNodeFromPTree(boost::property_tree::p
 								textureNo,
 								visible));
 				} else if ("cylinder" == geometryChild.first) {
-					// <box center="0 60 60" dimensions="80 120 120" rpy="0 0 0" color="127 127 127"/>
-					std::string posString = geometryChild.second.get<std::string>("<xmlattr>.center");
-					double pX, pY, pZ;
-					std::istringstream posSS(posString);
-					posSS >> pX >> pY >> pZ;
-
-					std::string rotString = geometryChild.second.get<std::string>("<xmlattr>.rpy");
-					double rX, rY, rZ;
-					std::istringstream rotSS(rotString);
-					rotSS >> rX >> rY >> rZ;
-
-					std::string name = geometryChild.second.get<std::string>("<xmlattr>.name");
 
 					std::string lenString = geometryChild.second.get<std::string>("<xmlattr>.length");
 					double length;
@@ -357,6 +361,25 @@ KinematicNode* KinematicNodeFactory::createNodeFromPTree(boost::property_tree::p
 								pZ*millimeters,
 								radius*millimeters,
 								length*millimeters,
+								rX*degrees,
+								rY*degrees,
+								rZ*degrees,
+								colorVec,
+								textureNo,
+								visible));
+				} else if ("sphere" == geometryChild.first) {
+					std::string radiusString = geometryChild.second.get<std::string>("<xmlattr>.radius");
+					double radius;
+					std::istringstream radSS(radiusString);
+					radSS >> radius;
+
+					kinematicNode->addVisual(
+						new KinematicVisualSphere(
+								name,
+								pX*millimeters,
+								pY*millimeters,
+								pZ*millimeters,
+								radius*millimeters,
 								rX*degrees,
 								rY*degrees,
 								rZ*degrees,
