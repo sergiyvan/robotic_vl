@@ -54,6 +54,12 @@ public:
         MotorID id2 = robotDescription.getEffectorID("propeller2");
         MotorID id3 = robotDescription.getEffectorID("propeller3");
 
+        // rotation calculation as follows:
+        // the speedToForceFactor is 0.001 which means that when the propeller is moving at 1000 rounds per minute it generates 1N force along its rotation axis
+        // the gravitational pull is -9.80665 (see physicsenvironment.h) so we multiply (on average) with 10 to get an acceleration of 10m/s^2
+        // propeller0 and propeller2 rotate in the oposite direction of the other rotors to make the overall quadcopter not spin around itself but I want it to spin so I have put some more speed on some propellers while removing some of others
+        // one propeller gets some more speed to make it fly a bit so the side (while spinning) for the overall effect
+        // we have 4 rotors so divide by 4
         getMotorPositionRequest().setSpeed(id0, robotMass.m_massGrams * rounds_per_minute * 9.1 / 4);
         getMotorPositionRequest().setSpeed(id1, robotMass.m_massGrams * rounds_per_minute * 11 / 4);
         getMotorPositionRequest().setSpeed(id2, robotMass.m_massGrams * rounds_per_minute * 9 / 4);
