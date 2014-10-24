@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<robotdescription>
+	<effector name="root" type="dummy" >
+		<body mass="100" name="" position="0 0 0"/>
+		
+		<visual>
+			<geometry>
+				<box center="09 0 0" dimensions="100 100 50" color="0 0 1 1" rpy="0 0 0" name="Karosserie" textureNo="0" />
+			</geometry>
+		</visual>
+			
+		<effector id="0" name="propeller0" type="propeller" position="300 300 50" rpy="180 0 0" maxForce="1" maxSpeed="8000" speedtoforcefactor="-0.001" >
+			<body mass="10" name="propeller0Mass" position="0 0 0"/>
+			<visual>
+				<geometry>
+					<cylinder center="0 0 0" length="10" radius="100" color="0.5 0.5 0.5 1" rpy="0 0 0" textureNo="2" />
+				</geometry>
+			</visual>
+		</effector>
+			
+		<effector id="1" name="propeller1" type="propeller" position="300 -300 50" rpy="0 0 0" maxForce="1" maxSpeed="8000" speedtoforcefactor="0.001" >
+			<body mass="10" name="propeller0Mass" position="0 0 0"/>
+			<visual>
+				<geometry>
+					<cylinder center="0 0 0" length="10" radius="100" color="0.5 0.5 0.5 1" rpy="0 0 0" textureNo="2" />
+				</geometry>
+			</visual>
+		</effector>
+			
+		<effector id="2" name="propeller2" type="propeller" position="-300 -300 50" rpy="180 0 0" maxForce="1" maxSpeed="8000" speedtoforcefactor="-0.001" >
+			<body mass="10" name="propeller0Mass" position="0 0 0"/>
+			<visual>
+				<geometry>
+					<cylinder center="0 0 0" length="10" radius="100" color="0.5 0.5 0.5 1" rpy="0 0 0" textureNo="2" />
+				</geometry>
+			</visual>
+		</effector>
+			
+		<effector id="3" name="propeller3" type="propeller" position="-300 300 50" rpy="0 0 0" maxForce="1" maxSpeed="8000" speedtoforcefactor="0.001" >
+			<body mass="10" name="propeller0Mass" position="0 0 0"/>
+			<visual>
+				<geometry>
+					<cylinder center="0 0 0" length="10" radius="100" color="0.5 0.5 0.5 1" rpy="0 0 0" textureNo="2" />
+				</geometry>
+			</visual>
+		</effector>
+		
+	</effector>
+</robotdescription>
+

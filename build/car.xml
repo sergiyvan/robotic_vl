@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<robotdescription>
+	<effector name="root" type="dummy" >
+		<body mass="1000" name="" position="0 0 0"/>
+		
+		<visual>
+			<geometry>
+				<box center="09 0 0" dimensions="300 150 100" color="1 0 0 1" rpy="0 0 0" name="Karosserie" textureNo="0" />
+			</geometry>
+		</visual>
+			
+		<effector id="4" name="steeringL" type="rotation" position="170 120 0" rpy="0 0 0" defaultMinMaxAngle="0 -10 10" maxForce="3.7" maxSpeed="80">
+			<body mass="10" name="steeringLMass" position="0 0 0"/>
+			<effector id="0" name="wheel0" type="wheel" position="0 0 0" rpy="270 0 0" maxForce="0.25" maxSpeed="8000">
+				<body mass="10" name="wheel0Mass" position="0 0 0"/>
+				<visual>
+					<geometry>
+						<cylinder center="0 0 0" length="10" radius="100" color="0 0 0 1" rpy="0 0 0" name="rad0" textureNo="2" />
+					</geometry>
+				</visual>
+			</effector>
+		</effector>
+				
+		<effector id="5" name="steeringR" type="rotation" position="170 -120 0" rpy="0 0 0" defaultMinMaxAngle="0 -10 10" maxForce="3.7" maxSpeed="80">
+			<body mass="10" name="steeringLMass" position="0 0 0"/>
+			<effector id="1" name="wheel1" type="wheel" position="0 0 0" rpy="270 0 0" maxForce="0.25" maxSpeed="8000">
+				<body mass="10" name="wheel0Mass" position="0 0 0"/>
+				<visual>
+					<geometry>
+						<cylinder center="0 0 0" length="10" radius="100" color="0 0 0 1" rpy="0 0 0" name="rad1" textureNo="2" />
+					</geometry>
+				</visual>
+			</effector>
+		</effector>
+			
+		<effector id="2" name="wheel2" type="wheel" position="-170 -120 0" rpy="270 0 0" maxForce="0.25" maxSpeed="8000">
+			<body mass="10" name="wheel0Mass" position="0 0 0"/>
+			<visual>
+				<geometry>
+					<cylinder center="0 0 0" length="10" radius="100" color="0 0 0 1" rpy="0 0 0" name="rad2" textureNo="2" />
+				</geometry>
+			</visual>
+		</effector>
+			
+		<effector id="3" name="wheel3" type="wheel" position="-170 120 0" rpy="270 0 0" maxForce="0.25" maxSpeed="8000">
+			<body mass="10" name="wheel0Mass" position="0 0 0"/>
+			<visual>
+				<geometry>
+					<cylinder center="0 0 0" length="10" radius="100" color="0 0 0 1" rpy="0 0 0" name="rad3" textureNo="2" />
+				</geometry>
+			</visual>
+		</effector>
+	</effector>
+</robotdescription>
+
