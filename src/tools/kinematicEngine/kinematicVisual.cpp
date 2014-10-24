@@ -33,8 +33,9 @@ KinematicVisualBox::KinematicVisualBox(
 			Degree alphaZ,
 			KinematicVisual::ColorVec colors,
 			int textureNum,
-			bool isVisible)
-	: KinematicVisual(name, translationX, translationY, translationZ, alphaX, alphaY, alphaZ, colors, textureNum, isVisible)
+			bool isVisible,
+			bool canCollide)
+	: KinematicVisual(name, translationX, translationY, translationZ, alphaX, alphaY, alphaZ, colors, textureNum, isVisible, canCollide)
 	, sizeX(sizeX)
 	, sizeY(sizeY)
 	, sizeZ(sizeZ)
@@ -115,9 +116,8 @@ void KinematicVisualBox::attatchToODE(arma::mat44 coordinateFrame, dBodyID body,
 	dGeomID boxGeom = dCreateBox(space, Meter(sizeX).value()
 									, Meter(sizeY).value()
 									, Meter(sizeZ).value());
-
 	ODEUserObject *userObj = new ODEUserObject;
-	userObj->canCollide = true;
+	userObj->canCollide = canCollide;
 	userObj->colorVec = m_colorVec;
 	userObj->textureNum = m_textureNum;
 	userObj->visible = visible;
@@ -171,8 +171,9 @@ KinematicVisualCylinder::KinematicVisualCylinder(
 		Degree alphaZ,
 		KinematicVisual::ColorVec colors,
 		int textureNum,
-		bool isVisible)
-	: KinematicVisual(name, translationX, translationY, translationZ, alphaX, alphaY, alphaZ, colors, textureNum, isVisible)
+		bool isVisible,
+		bool canCollide)
+	: KinematicVisual(name, translationX, translationY, translationZ, alphaX, alphaY, alphaZ, colors, textureNum, isVisible, canCollide)
 	, radius(radius)
 	, length(length)
 {
@@ -184,7 +185,7 @@ void KinematicVisualCylinder::attatchToODE(arma::mat44 coordinateFrame, dBodyID 
 									, Meter(length).value());
 
 	ODEUserObject *userObj = new ODEUserObject;
-	userObj->canCollide = true;
+	userObj->canCollide = canCollide;
 	userObj->colorVec = m_colorVec;
 	userObj->textureNum = m_textureNum;
 	userObj->visible = visible;
@@ -217,8 +218,9 @@ KinematicVisualSphere::KinematicVisualSphere(
 		Degree alphaZ,
 		KinematicVisual::ColorVec colors,
 		int textureNum,
-		bool isVisible)
-	: KinematicVisual(name, translationX, translationY, translationZ, alphaX, alphaY, alphaZ, colors, textureNum, isVisible)
+		bool isVisible,
+		bool canCollide)
+	: KinematicVisual(name, translationX, translationY, translationZ, alphaX, alphaY, alphaZ, colors, textureNum, isVisible, canCollide)
 	, radius(radius)
 {
 }
@@ -228,7 +230,7 @@ void KinematicVisualSphere::attatchToODE(arma::mat44 coordinateFrame, dBodyID bo
 	dGeomID sphereGeom = dCreateSphere(space, Meter(radius).value());
 
 	ODEUserObject *userObj = new ODEUserObject;
-	userObj->canCollide = true;
+	userObj->canCollide = canCollide;
 	userObj->colorVec = m_colorVec;
 	userObj->textureNum = m_textureNum;
 	userObj->visible = visible;

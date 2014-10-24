@@ -35,7 +35,7 @@ public:
 	 */
 	virtual void simulatorCallback(Second timeDelta);
 
-private:
+protected:
 
 	void updateJointForces(Second timeDelta);
 

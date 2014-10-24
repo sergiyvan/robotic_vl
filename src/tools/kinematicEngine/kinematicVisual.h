@@ -68,10 +68,12 @@ public:
 			Degree alphaZ,
 			ColorVec colors,
 			int textureNum,
-			bool visible=true)
+			bool visible = true,
+			bool canCollide = true)
 		: m_colorVec(colors)
 		, m_textureNum(textureNum)
 		, visible(visible)
+		, canCollide(canCollide)
 		, name(name)
 	{
 		arma::mat44 translation, rotationX, rotationY, rotationZ;
@@ -136,6 +138,7 @@ protected:
 	ColorVec m_colorVec;
 	int m_textureNum;
 	bool visible;
+	bool canCollide;
 
 private:
 	std::string name;
@@ -161,7 +164,8 @@ public:
 			Degree alphaZ,
 			KinematicVisual::ColorVec colors,
 			int textureNum,
-			bool isVisible = true);
+			bool isVisible = true,
+			bool canCollide = true);
 
 	virtual void attatchToODE(arma::mat44 coordinateFrame, dBodyID body, dSpaceID space);
 
@@ -184,7 +188,8 @@ public:
 			Degree alphaZ,
 			KinematicVisual::ColorVec colors,
 			int textureNum,
-			bool isVisible = true);
+			bool isVisible = true,
+			bool canCollide = true);
 
 	virtual void attatchToODE(arma::mat44 coordinateFrame, dBodyID body, dSpaceID space);
 
@@ -207,7 +212,8 @@ public:
 			Degree alphaZ,
 			KinematicVisual::ColorVec colors,
 			int textureNum,
-			bool isVisible = true);
+			bool isVisible = true,
+			bool canCollide = true);
 
 	virtual void attatchToODE(arma::mat44 coordinateFrame, dBodyID body, dSpaceID space);
 

@@ -69,7 +69,7 @@ public:
 
 	virtual void setTorqueForODE(double torque);
 
-private:
+protected:
 	Degree m_angle;
 
 	dJointID m_rotationJoint;

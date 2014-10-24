@@ -12,6 +12,8 @@
 #include <boost/optional/optional.hpp>
 
 #include "kinematicNodeRotation.h"
+#include "kinematicNodeWheel.h"
+#include "kinematicNodePropeller.h"
 #include "kinematicNodeParallelRotation.h"
 #include "kinematicNodeDummy.h"
 #include "kinematicNodeFixed.h"
@@ -59,6 +61,74 @@ public:
 						alphaX,
 						alphaY,
 						alphaZ);
+	}
+
+	KinematicNodeWheel *generateWheelNode(boost::property_tree::ptree::value_type &ptree) const {
+		MotorID id = MotorID(0);
+		std::string name = "";
+		Millimeter translationX = 0 * millimeters;
+		Millimeter translationY = 0 * millimeters;
+		Millimeter translationZ = 0 * millimeters;
+		Degree alphaX = 0 * degrees;
+		Degree alphaY = 0 * degrees;
+		Degree alphaZ = 0 * degrees;
+		double defaultValue = 0.;
+		double minValue = 0.;
+		double maxValue = 0.;
+		double maxForce = 0.;
+		double maxSpeed = 0.;
+
+		assembleAttrs(ptree, id, name, translationX, translationY, translationZ, alphaX, alphaY, alphaZ, defaultValue, minValue, maxValue, maxForce, maxSpeed);
+
+		return new KinematicNodeWheel(id,
+						nullptr,
+						name,
+						maxForce,
+						maxSpeed * rounds_per_minute,
+						translationX,
+						translationY,
+						translationZ,
+						alphaX,
+						alphaY,
+						alphaZ);
+	}
+
+	KinematicNodeWheel *generatePropellerNode(boost::property_tree::ptree::value_type &ptree) const {
+		MotorID id = MotorID(0);
+		std::string name = "";
+		Millimeter translationX = 0 * millimeters;
+		Millimeter translationY = 0 * millimeters;
+		Millimeter translationZ = 0 * millimeters;
+		Degree alphaX = 0 * degrees;
+		Degree alphaY = 0 * degrees;
+		Degree alphaZ = 0 * degrees;
+		double defaultValue = 0.;
+		double minValue = 0.;
+		double maxValue = 0.;
+		double maxForce = 0.;
+		double maxSpeed = 0.;
+
+		assembleAttrs(ptree, id, name, translationX, translationY, translationZ, alphaX, alphaY, alphaZ, defaultValue, minValue, maxValue, maxForce, maxSpeed);
+
+
+		double speedToForceFactor = 0.;
+		boost::optional<double> speedToForceFactorProp = ptree.second.get_optional<double>("<xmlattr>.speedtoforcefactor");
+		if (speedToForceFactorProp.is_initialized()) {
+			speedToForceFactor = speedToForceFactorProp.get();
+		}
+
+		return new KinematicNodePropeller(id,
+						nullptr,
+						name,
+						maxForce,
+						maxSpeed * rounds_per_minute,
+						translationX,
+						translationY,
+						translationZ,
+						alphaX,
+						alphaY,
+						alphaZ,
+						speedToForceFactor);
 	}
 
 	KinematicNodeParallelRotation *generateParallelRotationNode(boost::property_tree::ptree::value_type &ptree) const {
@@ -242,6 +312,12 @@ KinematicNode* KinematicNodeFactory::createNodeFromPTree(boost::property_tree::p
 	} else if (typeName == "fixed")
 	{
 		kinematicNode = nodeBuilder.generateFixedNode(ptree);
+	} else if (typeName == "wheel")
+	{
+		kinematicNode = nodeBuilder.generateWheelNode(ptree);
+	} else if (typeName == "propeller")
+	{
+		kinematicNode = nodeBuilder.generatePropellerNode(ptree);
 	} else if (typeName == "piston")
 	{
 		// TODO
@@ -319,6 +395,16 @@ KinematicNode* KinematicNodeFactory::createNodeFromPTree(boost::property_tree::p
 					}
 				}
 
+				boost::optional<std::string> canCollideProp = geometryChild.second.get_optional<std::string>("<xmlattr>.cancollide");
+				bool canCollide = true;
+				if (canCollideProp.is_initialized()) {
+					std::string canCollideStr = canCollideProp.get();
+					std::transform(canCollideStr.begin(), canCollideStr.end(), canCollideStr.begin(), ::tolower);
+					if ("true" != canCollideStr) {
+						canCollide = false;
+					}
+				}
+
 				if ("box" == geometryChild.first) {
 
 					std::string dimString = geometryChild.second.get<std::string>("<xmlattr>.dimensions");
@@ -340,7 +426,8 @@ KinematicNode* KinematicNodeFactory::createNodeFromPTree(boost::property_tree::p
 								rZ*degrees,
 								colorVec,
 								textureNo,
-								visible));
+								visible,
+								canCollide));
 				} else if ("cylinder" == geometryChild.first) {
 
 					std::string lenString = geometryChild.second.get<std::string>("<xmlattr>.length");
@@ -366,7 +453,8 @@ KinematicNode* KinematicNodeFactory::createNodeFromPTree(boost::property_tree::p
 								rZ*degrees,
 								colorVec,
 								textureNo,
-								visible));
+								visible,
+								canCollide));
 				} else if ("sphere" == geometryChild.first) {
 					std::string radiusString = geometryChild.second.get<std::string>("<xmlattr>.radius");
 					double radius;
@@ -385,7 +473,8 @@ KinematicNode* KinematicNodeFactory::createNodeFromPTree(boost::property_tree::p
 								rZ*degrees,
 								colorVec,
 								textureNo,
-								visible));
+								visible,
+								canCollide));
 				}
 			}
 		}
