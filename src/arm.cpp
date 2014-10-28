@@ -16,44 +16,105 @@
 #include "modules/motion/motion.h"
 
 // representations
-#include "representations/motion/motorPositionRequest.h"
 #include "representations/hardware/motorAngles.h"
+#include "representations/motion/kinematicTree.h"
+#include "representations/motion/motorPositionRequest.h"
 
 #include "platform/hardware/robot/robotModel.h"
 #include "platform/hardware/robot/robotDescription.h"
 
-#include <sstream>
+//io
 #include <iostream>
-
-
+#include <fstream>
 
 /*------------------------------------------------------------------------------------------------*/
 BEGIN_DECLARE_MODULE(ArmMotionTest)
 	REQUIRE(MotorAngles)
+	REQUIRE(KinematicTree)
 	PROVIDE(MotorPositionRequest)
 END_DECLARE_MODULE(ArmMotionTest)
 
 class ArmMotionTest : public ArmMotionTestBase {
 private:
+	std::ofstream myfile;
+	int state;
+	std::pair<float, float> goals[4];
 
 public:
 	ArmMotionTest() {
 	}
 
 	virtual void init() {
+		myfile.open("motor_values.csv");
+		state=0;
+        goals[0]=std::make_pair(0.2, 0.7);
+        goals[1]=std::make_pair(-0.3, 0.7);
+        goals[2]=std::make_pair(-0.2, 0.3);
+        goals[3]=std::make_pair(0.3, 0.2);
 	}
 
 	virtual void execute() {
-        RobotDescription const& robotDescription = *services.getRobotModel().getRobotDescription();
+
+		RobotDescription const& robotDescription = *services.getRobotModel().getRobotDescription();
+        MotorID idRoot = robotDescription.getEffectorID("root");
+//        MotorID id0 = robotDescription.getEffectorID("motor0");
         MotorID id1 = robotDescription.getEffectorID("motor1");
         MotorID id2 = robotDescription.getEffectorID("motor2");
+        MotorID idHand = robotDescription.getEffectorID("hand");
 
-        Degree curAngle1 = getMotorAngles().getPosition(id1);
-        Degree curAngle2 = getMotorAngles().getPosition(id2);
+//        Degree curAngle0 = getMotorAngles().getPosition(id0);
+//        Degree curAngle1 = getMotorAngles().getPosition(id1);
+//        Degree curAngle2 = getMotorAngles().getPosition(id2);
 
-        getMotorPositionRequest().setPositionAndSpeed(id1, curAngle1 + 5. * degrees, 20. * rounds_per_minute);
-        getMotorPositionRequest().setPositionAndSpeed(id2, curAngle2 + 5. * degrees, 20. * rounds_per_minute);
+        arma::mat44 transMatRootToHand = getKinematicTree().getTransitionMatrixFromTo(idRoot, idHand);
+
+        //replace this dummy code with your code
+
+        uint64_t time = getCurrentTime().value();
+        state = (time / 2000) % 3; //change state (modulo 3) every 2000 milliseconds
+
+        INFO("State: %d", state)
+
+        Degree angle1, angle2;
+
+		anglesFromYZ(angle1, angle2, goals[state].first, goals[state].second);
+
+        getMotorPositionRequest().setPositionAndSpeed(id1, angle1, 20. * rounds_per_minute);
+        getMotorPositionRequest().setPositionAndSpeed(id2, angle2, 20. * rounds_per_minute);
+
+        //output on console
+        INFO("x: %f y: %f z: %f", transMatRootToHand(0, 3), transMatRootToHand(1, 3), transMatRootToHand(2, 3));
+//        INFO("\n(%f, %f, %f)\n(%f, %f, %f)\n(%f, %f, %f)",
+//        		transMatRootToHand(0,0), transMatRootToHand(0,1), transMatRootToHand(0,2),
+//        		transMatRootToHand(1,0), transMatRootToHand(1,1), transMatRootToHand(1,2),
+//        		transMatRootToHand(2,0), transMatRootToHand(2,1), transMatRootToHand(2,2)
+//        );
+
+        //output in file
+		myfile << transMatRootToHand(0, 3) << ","
+				<< transMatRootToHand(1, 3) << ","
+				<< transMatRootToHand(2, 3) << ","
+				<< std::endl;
 	}
+
+	bool anglesFromYZ(Degree& angle1, Degree& angle2, float y, float z) {
+		//Replace this dummy code with your code
+		if (state == 0) {
+			angle1 = 90. * degrees;
+			angle2 = -90. * degrees;
+			return true;
+		} else if (state == 1) {
+			angle1 = -90. * degrees;
+			angle2 = 90. * degrees;
+			return true;
+		} else if (state == 2) {
+			angle1 = 0. * degrees;
+			angle2 = 0. * degrees;
+			return true;
+		}
+		return false;
+	}
+
 };
 
 
