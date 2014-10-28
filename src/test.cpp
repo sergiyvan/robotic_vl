@@ -6,24 +6,22 @@
  * Please don't commit this file. The tests should stay on your computer.
  */
 
+
 #include "debug.h"
 #include "services.h"
 
 #include "communication/comm.h"
 #include "management/commandLine.h"
-#include "platform/hardware/robot/robotModel.h"
 
 // module framework
 #include "modules/motion/motion.h"
 
 // representations
 #include "representations/motion/motorPositionRequest.h"
-#include "representations/motion/kinematicTree.h"
+#include "representations/hardware/motorAngles.h"
 
-#include "representations/motion/kinematicengine/kinematicEngineTasks.h"
-
-#include "tools/kinematicEngine/tasks/kinematicEngineTaskCOMWholeRobot.h"
-#include "tools/kinematicEngine/tasks/kinematicEngineTaskLocation.h"
+#include "platform/hardware/robot/robotModel.h"
+#include "platform/hardware/robot/robotDescription.h"
 
 #include <sstream>
 #include <iostream>
@@ -37,7 +35,7 @@
 
 /*------------------------------------------------------------------------------------------------*/
 BEGIN_DECLARE_MODULE(MotionTest)
-	PROVIDE(KinematicEngineTasks)
+	PROVIDE(MotorAngles)
 	PROVIDE(MotorPositionRequest)
 END_DECLARE_MODULE(MotionTest)
 
@@ -53,6 +51,15 @@ public:
 	}
 
 	virtual void execute() {
+	RobotDescription const& robotDescription = *services.getRobotModel().getRobotDescription();
+        MotorID id1 = robotDescription.getEffectorID("motor1");
+        //MotorID id2 = robotDescription.getEffectorID("motor2");
+
+        Degree curAngle1 = getMotorAngles().getPosition(id1);
+        //Degree curAngle2 = getMotorAngles().getPosition(id2);
+
+        getMotorPositionRequest().setPositionAndSpeed(id1, curAngle1 + 5. * degrees, 10. * rounds_per_minute);
+        //getMotorPositionRequest().setPositionAndSpeed(id2, curAngle2 + 5. * degrees, 20. * rounds_per_minute);
 		// ------ INSERT YOUR code here BUT DO NOT COMMIT THIS FILE!
 	}
 };
