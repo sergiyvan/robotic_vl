@@ -6,8 +6,18 @@
  */
 
 #include "physicsVisualization.h"
+#include "management/config/config.h"
+#include "management/commandLine.h"
 
-PhysicsVisualization::PhysicsVisualization() {
+
+namespace {
+	auto tmp = ConfigRegistry::getInstance().registerSwitch("followcam", "In the physics simulation, the camera follows the object");
+}
+
+
+PhysicsVisualization::PhysicsVisualization()
+	: lastObservedPosition{0, 0, 0}
+{
 }
 
 PhysicsVisualization::~PhysicsVisualization() {
@@ -172,6 +182,35 @@ void PhysicsVisualization::setEnvironmentToDraw(PhysicsEnvironment *env) {
 
 void PhysicsVisualization::draw(int pause)
 {
+	if (CommandLine::getInstance().isSwitchEnabled("followcam")) {
+		// get first geom, we work on the assumption that following its movements
+		// will follow the object we are interested in
+		dGeomID geomID = dSpaceGetGeom(g_envToDraw->getVisualsSpaceID(), 0);
+		if (nullptr != geomID) {
+			const dReal *currentPosition = dGeomGetPosition(geomID);
+
+			// translation
+			dReal delta[3] = {
+					currentPosition[0] - lastObservedPosition[0],
+					currentPosition[1] - lastObservedPosition[1],
+					currentPosition[2] - lastObservedPosition[2]
+			};
+
+			// apply to viewpoint
+			float viewPoint[3], hpr[3];
+			dsGetViewpoint(viewPoint, hpr);
+			viewPoint[0] += delta[0];
+			viewPoint[1] += delta[1];
+			viewPoint[2] += delta[2];
+			dsSetViewpoint(viewPoint, hpr);
+
+			// remember this position
+			lastObservedPosition[0] = currentPosition[0];
+			lastObservedPosition[1] = currentPosition[1];
+			lastObservedPosition[2] = currentPosition[2];
+		}
+	}
+
 	if (nullptr != g_drawingThread && nullptr != g_envToDraw)
 	{
 		g_envToDraw->pauseSimulation();
