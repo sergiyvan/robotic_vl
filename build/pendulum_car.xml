@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<robotdescription>
+	<effector name="root" type="dummy" >
+		<body mass="1000" name="" position="0 0 0"/>
+		
+		<effector name="wheelR" type="wheel" position="-150 0 0" rpy="270 0 0" maxForce="1." maxSpeed="8000">
+			<body mass="1" name="wheel0Mass" position="0 0 0"/>
+			<visual>
+				<geometry>
+					<cylinder center="0 0 0" length="100" radius="100" color="0 0 0 1" rpy="0 0 0" name="radR" textureNo="2" />
+				</geometry>
+			</visual>
+		</effector>
+			
+		<effector name="wheelL" type="wheel" position="150 0 0" rpy="270 0 0" maxForce="1." maxSpeed="8000">
+			<body mass="1" name="wheel0Mass" position="0 0 0"/>
+			<visual>
+				<geometry>
+					<cylinder center="0 0 0" length="100" radius="100" color="0 0 0 1" rpy="0 0 0" name="radL" textureNo="2" />
+				</geometry>
+			</visual>
+		</effector>
+
+		<effector name="pendulum" type="rotation" position="0 0 0" rpy="90 0 0" defaultMinMaxAngle="15 -360 360" maxForce=".0" maxSpeed="80">
+			<body mass="1" name="pendulumMass" position="0 1000 0"/>
+			<visual>
+				<geometry>
+					<cylinder center="0 1000 0" length="50" radius="50" color="1 1 1 1" rpy="0 0 0" name="pendulumHead" />
+				</geometry>
+			</visual>
+		</effector>
+
+
+	</effector>
+</robotdescription>
+

@@ -26,6 +26,9 @@ private:
 	PhysicsVisualization();
 	friend class Singleton<PhysicsVisualization>;
 
+	/// the position we are looking at
+	dReal lastObservedPosition[3];
+
 	CriticalSection m_cs;
 };
 

@@ -116,7 +116,7 @@ void ODEHingeMotor::updateJointForces(Second timeDelta)
 	Degree curAngle = getCurAngle();
 //	RPM curSpeed = getCurSpeed();
 
-	double pDiff = Radian(m_targetAngle - curAngle).value() * DEFAULT_MP;
+	double pDiff = Math::normalize(Radian(m_targetAngle - curAngle)).value() * DEFAULT_MP;
 
 //	double dDiff = curSpeed.value() * 2. * M_PI / 60.;
 
