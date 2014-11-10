@@ -90,10 +90,10 @@ public:
         //http://rn-wissen.de/wiki/index.php/Regelungstechnik
 
         float k_p = 100.;
-        float k_i = 60.;
-        float k_d = 50.;
+        float k_i = 129.9;
+        float k_d = 5.;
 
-        float e =(15. - curAngle.value()) ; // soll-wert - ist-wert
+        float e =(-0.1 - curAngle.value()) ; // soll-wert - ist-wert
         esum = esum + e;
 
         float p = k_p *e;
