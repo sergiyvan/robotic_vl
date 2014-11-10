@@ -36,7 +36,8 @@ class PendulumCarMotionTest : public PendulumCarMotionTestBase {
 private:
 	Degree lastAngle;
     Second lastTime;
-
+    float esum;
+    float ealt;
 	std::ofstream myfile;
 	Second startTime;
 	Second writeTimer;
@@ -51,7 +52,8 @@ public:
         MotorID idP = robotDescription.getEffectorID("pendulum");
         lastAngle = getMotorAngles().getPosition(idP);
         lastTime = 0 * seconds;
-
+        esum = 0.;
+        ealt = 0.;
 		myfile.open("angle_values.csv");
         startTime = Second(getCurrentTime());
 		writeTimer = 0 * seconds;
@@ -82,9 +84,24 @@ public:
 
         INFO("===============================");
 
-
         //set speed value (insert your code here)
-        RPM speed = 0. * rounds_per_minute;
+        RPM speed;
+
+        //http://rn-wissen.de/wiki/index.php/Regelungstechnik
+
+        float k_p = 100.;
+        float k_i = 60.;
+        float k_d = 50.;
+
+        float e =(15. - curAngle.value()) ; // soll-wert - ist-wert
+        esum = esum + e;
+
+        float p = k_p *e;
+        float i = k_i * timeDiff.value() *esum;
+        float d = k_d *((e-ealt)/timeDiff.value());
+
+        speed = (p+ i +d) * rounds_per_minute;
+
 
         getMotorPositionRequest().setSpeed(idL, speed);
         getMotorPositionRequest().setSpeed(idR, speed);
@@ -92,6 +109,7 @@ public:
         //update lastValues
         lastAngle = curAngle;
         lastTime = curTime;
+        ealt = e;
 
         //output in file (every ~0.1 seconds)
         writeTimer += timeDiff;
