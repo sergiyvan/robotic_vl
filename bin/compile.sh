@@ -11,16 +11,6 @@
 # SETTINGS
 ###############################################################################
 
-# address (first three bytes) of the FUmanoid network
-if [[ -z $FUMANOID_NETWORK ]]; then
-	FUMANOID_NETWORK=192.168.0
-fi
-
-# the servers in the lab network used for distcc
-if [[ -z $FUMANOID_DISTCC ]]; then
-	FUMANOID_DISTCC="192.168.0.200/2 192.168.0.253/2 192.168.0.254/4"
-fi
-
 # processor count.
 if [[ -z $PROCESSORCOUNT ]]; then
 	PROCESSORCOUNT=`cat /proc/cpuinfo | grep -i ^processor | wc -l`
@@ -56,36 +46,8 @@ if [[ -z $USE_CCACHE ]]; then
 fi
 export USE_CCACHE
 
-# Setup distcc. If USE_DISTCC is set to 0 or if we are not connected by cable to
-# the FUmanoid network, disable distcc.
-ifconfig | grep -A 2 eth0 | grep -q $FUMANOID_NETWORK
-ON_LOCAL_FUMANOID_NETWORK=$?
-
-if [[ $USE_DISTCC == 0 || $ON_LOCAL_FUMANOID_NETWORK != 0 ]]; then
-	export USE_DISTCC=0
-else
-	export USE_DISTCC=1
-
-	# use all cores on this machine, as well as the fumanoid servers and
-	# the other preset hosts
-	for ip in $FUMANOID_DISTCC; do
-		IP=${ip%%/*}
-		# see if this IP is in my interface list
-		MYIP=`ifconfig | grep $IP`
-
-		# for IPs that are not local, check whether they are available and
-		# if yes, add them to the list
-		if [[ -z $MYIP ]]; then
-			ping -q -c 1 -W 1 $IP > /dev/null && DISTCC_HOSTS="$ip $DISTCC_HOSTS"
-		fi
-	done
-	DISTCC_HOSTS="localhost/$PROCESSORCOUNT $DISTCC_HOSTS"
-echo using $DISTCC_HOSTS
-	export DISTCC_HOSTS
-echo $DISTCC_HOSTS
-	# distcc makes sure we utilize the system properly, so take the upper limit
-	PROCESSORCOUNT=30
-fi
+# disable distcc support
+export USE_DISTCC=0
 
 # get build information
 BRANCHNAME="`git symbolic-ref HEAD 2> /dev/null | cut -b 12-`"
